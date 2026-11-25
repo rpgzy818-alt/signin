@@ -12,31 +12,22 @@
   // 平台化时只需改这里：把 API_BASE 指向平台网关，把活动标识接入平台上下文，
   // 下面所有业务函数不用动。不要在别处散布 "meeting" / "admin" 字面量。
   var PLATFORM = {
-    // 本地联调默认后端；线上按目录推导，规则见 apiBaseFromPath
-    devApi: "http://127.0.0.1:8088/platform/api",
-    // 后台所在目录（相对站点根）→ API 基址。
-    // 按完整目录映射而不是只取末段：/platform/admin/ 与 /platform-staging/admin/
-    // 末段都是 admin，只取末段分不出生产与测试，会把测试后台打到生产接口上。
-    siteToApi: {
-      "platform/admin": "/platform/api",
-      "platform-staging/admin": "/platform-staging/api"
-    },
-    // 当前活动标识：平台化后从平台上下文/URL 注入；现在默认当前活动
+    // 接口基址：本项目前后端同域部署，接口固定在站点根的 /api 下。
+    // 页面可能挂在 / 或 /admin/，按目录推导会得到 /admin/api（错的），
+    // 所以这里不推导，直接给同域路径。要跨域就改 site-config.js 的 api 字段。
+    devApi: "/api",
+    // 当前活动标识：单机构版只有一个活动，服务端按默认活动处理
     activityId: getParam("activity") || "current"
   };
   function apiBaseFromPath() {
-    // 站点配置优先：绑独立域名后后台不在 /xxx/admin/ 这种可推导的目录下，
-    // 按路径猜必然错，配置里写死才可靠（见 site-config.js）。
+    // 站点配置优先：绑独立域名或前后端分域时，配置里写死才可靠（见 site-config.js）
     var c = window.__SITE__ || {};
     if (c.api) return String(c.api).replace(/\/+$/, "");
-    var dir = location.pathname.replace(/[^\/]*$/, "").replace(/^\/+|\/+$/g, "");  // platform/admin
-    var target = PLATFORM.siteToApi[dir];
-    if (!target) target = "/" + (dir.split("/")[0] || "platform") + "/api";  // 兜底取首段
-    return target;
+    return PLATFORM.devApi;
   }
   var isLocal = (location.hostname === "127.0.0.1" || location.hostname === "localhost");
-  // 本地可用 ?api= 覆盖；线上走配置块推导
-  var API = (isLocal && getParam("api")) || (isLocal ? PLATFORM.devApi : apiBaseFromPath());
+  // 本地可用 ?api= 覆盖，其余一律走上面的推导（本地与线上同一条路，避免两套逻辑）
+  var API = getParam("api") || apiBaseFromPath();
 
   function getParam(name) {
     var m = new RegExp("[?&]" + name + "=([^&#]*)").exec(location.search);

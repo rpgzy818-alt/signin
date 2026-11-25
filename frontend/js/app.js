@@ -15,7 +15,7 @@
   var STAFF_INFO = null;
 
   // ---- 配置（上线前按需调整）----
-  var DEV_API = "http://127.0.0.1:8088/platform/api";   // 平台化副本：本地联调端口 8088
+  var DEV_API = "/api";   // 本地联调也走同域 /api：后端默认 8087，页面由后端一并托管
   // 本地可用 ?api= 切到别的后端实例（演示/联调用）；非本地域名一律走同域路径，不可被覆盖
   var isLocal = (location.hostname === "127.0.0.1" || location.hostname === "localhost");
   // 站点配置优先（部署时注入，见 site-config.js）：绑独立域名后路径不再能代表站点，
@@ -29,7 +29,7 @@
     if (!dir || dir === "/") dir = "/";                    // 兜底：部署在站点根
     return dir.replace(/\/$/, "") + "/api";
   }
-  var API = (isLocal && getParam("api")) || (isLocal ? DEV_API : prodApiBase());
+  var API = getParam("api") || prodApiBase();
   // ---- 微信能力（可选）----
   // 开源版默认关闭：RC_API 是微信公众号签名与 openid 换取服务，属于部署方自有基础设施。
   // 留空即停用「微信内自动登录 + 自定义分享卡片」，页面回落到普通 H5 流程，不影响报名签到。
