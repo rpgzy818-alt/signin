@@ -317,9 +317,10 @@ def export(token: str = ""):
         })
     write_admin_log("export", "导出报名明细 %d 行" % len(rows), acc["username"])
     return PlainTextResponse(
-        csv_text,
+        # 前置 BOM：Excel 双击打开 .csv 时按本地编码解析，没有 BOM 中文一律乱码
+        "\ufeff" + csv_text,
         media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": "attachment; filename=meeting_registration.csv"},
+        headers={"Content-Disposition": "attachment; filename=signin_registration.csv"},
     )
 
 
@@ -1796,9 +1797,10 @@ def export_checkins(token: str = ""):
         })
     write_admin_log("export", "导出签到流水 %d 行" % len(rows), acc["username"])
     return PlainTextResponse(
-        csv_text,
+        # 同报名明细：Excel 直接打开要靠 BOM 认 UTF-8
+        "\ufeff" + csv_text,
         media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": "attachment; filename=meeting_checkins.csv"},
+        headers={"Content-Disposition": "attachment; filename=signin_checkins.csv"},
     )
 
 
@@ -1918,9 +1920,10 @@ def export_card_actions(token: str = ""):
         })
     write_admin_log("export", "导出领卡行为记录 %d 行" % len(rows), acc["username"])
     return PlainTextResponse(
-        csv_text,
+        # 同报名明细：Excel 直接打开要靠 BOM 认 UTF-8
+        "\ufeff" + csv_text,
         media_type="text/csv; charset=utf-8",
-        headers={"Content-Disposition": "attachment; filename=meeting_card_actions.csv"},
+        headers={"Content-Disposition": "attachment; filename=signin_card_actions.csv"},
     )
 
 
@@ -2218,7 +2221,7 @@ def admin_stats_export(token: str = "", start: str = "", end: str = "",
                 _ds_cell(e["channel"]), _ds_cell(e["first_channel"]),
                 _ds_cell(e["os"]), _ds_cell(e["model"]), _ds_cell(e["screen"]),
             ]))
-        fname = "meeting_stats_events.csv"
+        fname = "signin_stats_events.csv"
     else:
         k = data["kpi"]
         lines.append("指标,数值")
@@ -2248,7 +2251,7 @@ def admin_stats_export(token: str = "", start: str = "", end: str = "",
         lines.append("归因口径,%s" % ("首次触点" if attribution == "first" else "末次触点"))
         lines.append("筛选渠道,%s" % _ds_cell(channel or "全部"))
         lines.append("筛选系统,%s" % _ds_cell(os or "全部"))
-        fname = "meeting_stats_summary.csv"
+        fname = "signin_stats_summary.csv"
 
     csv_text = "\n".join(lines) + "\n"
     with transaction() as c:

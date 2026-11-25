@@ -1,5 +1,5 @@
 """
-meeting-platform 后端配置（自 meeting-h5 v151 复制，环境标识已换）
+签到会 signin 后端配置
 从环境变量读取，并可选加载同目录 .env（简单 KEY=VALUE 解析，避免额外依赖）。
 """
 import datetime as _dt
@@ -54,7 +54,7 @@ DB_ENV = _get("DB_ENV", "prod")
 # 换环境（比如另开一套演示库）不用改代码。
 DEMO_ORG_ID = int(_get("DEMO_ORG_ID", "9001") or 9001)
 
-# 主站域名：部署时用环境变量注入自己的域名（如 meeting.example.com）。
+# 主站域名：部署时用环境变量注入自己的域名（如 signin.example.com）。
 # 开源版不预置任何域名，留空即按请求 Host 处理，不影响本地与自建部署。
 SITE_HOST = _get("SITE_HOST", "").strip().lower().strip(".")
 

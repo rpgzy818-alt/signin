@@ -10,7 +10,7 @@
     2026-11-17T10:20:44+0800 WARN  req       req m=POST p=/api/register s=429 ms=1.2 ip=1.2.3.4
 
 约定：
-    · 一行一个事件，`journalctl -u meeting | grep register_fail` 直接能捞
+    · 一行一个事件，`journalctl -u signin | grep register_fail` 直接能捞
     · 只在「有信息量」时打：写操作成功/失败、被拒绝、慢请求、异常。
       读接口（/me、/config、/health）不打，否则后台轮询会把 journal 刷满。
     · 手机号一律掩码、openid 只留首尾。日志不能成为第二份个人信息库。
@@ -23,7 +23,7 @@ import time
 # 触发日志的耗时阈值（毫秒）。低于此值且状态码正常的请求不留痕。
 SLOW_MS = float(os.getenv("LOG_SLOW_MS", "800"))
 
-_LOGGER_NAME = "meeting"
+_LOGGER_NAME = "signin"
 _configured = False
 
 

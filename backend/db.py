@@ -1,5 +1,5 @@
 """
-meeting-h5 数据库层
+签到会 signin 数据库层
 - SQLite(WAL)
 - 表：registration / checkin / staff / events（＋ export_log / gate_config /
   card_claim / card_action / admin_log）
