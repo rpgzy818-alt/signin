@@ -112,7 +112,7 @@
     if (bb) bb.setAttribute("data-back-to", backTo);
     // 浏览器标题按场景切换：后台是系统名，前台是活动名
     document.title = route === "admin"
-      ? "Meeting · 会议活动管理系统"
+      ? "签到会 · 活动报名与签到"
       : (EVT && EVT.title ? EVT.title : document.title);
     // 进入成功页：凭证码 + 领卡引导一起铺。
     // 领卡引导原只挂在 routeByState 的「已报名」分支上，而 iOS 微信的 go() 走

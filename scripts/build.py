@@ -18,9 +18,9 @@ FE = os.path.join(ROOT, 'frontend')
 INCLUDE_HTML = re.compile(r'^\s*<!--@include:\s*(\S+?)\s*-->\s*$')
 INCLUDE_JS = re.compile(r'^\s*/\*@include:\s*(\S+?)\s*\*/\s*$')
 
-# ============ 产物清单：平台化加端只加这里 ============
+# ============ 产物清单：加端只加这里 ============
 PRODUCTS = {
-    'meeting': {
+    'signin': {
         'html_shell': 'public/shell.html',
         'html_out': 'index.html',
         'js_shell': 'public/app.shell.js',
