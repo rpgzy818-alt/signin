@@ -73,7 +73,12 @@ function frHeadHtml(f, withCount) {
 function frFieldEl(f) {
   var disp = frDisplay(f);
   var key = frEsc(f.key);
-  var ph = f.placeholder ? frEsc(f.placeholder) : " ";
+  // 浮动标签模式下占位符必须留空：标签本身就浮在输入框中间，
+  // 再塞一段 placeholder 会和标签叠在同一位置（旧 schema 里存的是「选填」，
+  // 在无浮标的老版式下才合理）。这里统一挡掉。
+  var _ph = (f.placeholder || "").trim();
+  if (_ph === "选填") _ph = "";
+  var ph = _ph ? frEsc(_ph) : " ";
   var maxlen = f.max_len ? ' maxlength="' + f.max_len + '"' : "";
 
   // 手机号：区号与号码并排，区号固定 122px（与原版一致，避免号码被挤窄）

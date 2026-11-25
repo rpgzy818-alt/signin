@@ -189,12 +189,11 @@ def config_payload(host: str = "", act_code: str = "") -> dict:
     配置之前返回——否则机构 A 的访客会看到默认活动的日程、CTA 与主题，
     那是实打实的跨租户串数据。带 `?a=`（分享链接、物料码）时照旧进活动流。
     """
-    if not (act_code or "").strip():
-        conn = get_conn()
-        org_row = portal_def.find_org(conn, host=host or "")
-        if org_row is not None:
-            return {"ok": True, "env": DB_ENV, "mode": "org_home",
-                    **portal_def.payload(conn, org_row)}
+    # 单机构版没有「机构门面」这一层：站点本身就是活动页。
+    # 原逻辑在没有活动短码时按 Host 判定是否返回机构首页，在多机构下是对的
+    # （防止机构 A 的访客看到默认活动的日程），但这里只有一家机构、一个默认活动，
+    # 再判定就变成「每次打开都落到门面页」，前端拿不到活动配置直接白屏。
+    # 所以这里不判门面，一路走活动配置。
 
     b = bgm_config()
     act = actx.current()

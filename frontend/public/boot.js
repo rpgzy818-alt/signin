@@ -6,7 +6,8 @@
       // 不该把一个已经指名要报名某场活动的人拦在门口多点一次。
       var orgCode = getParam("org");
       if (orgCode && !getParam("a")) {
-        loadOrgPortal(orgCode).then(renderOrgHome).catch(showOrgMiss);
+        if (typeof renderOrgHome === "function") loadOrgPortal(orgCode).then(renderOrgHome).catch(showOrgMiss);
+        else showOrgMiss && showOrgMiss();
         return;
       }
       // 先取配置再取状态：机构首页（RD-13）只看配置就够了。
@@ -21,7 +22,9 @@
         // 机构域名访问根路径：后端只回机构与活动列表（mode=org_home）。
         // 这条分支必须在这里断开——往下走会把默认活动的音乐、草稿角标、
         // 报名状态一并套到机构门面上。
-        if (CONFIG.mode === "org_home") { renderOrgHome(CONFIG); return; }
+        // 单机构版没有机构门面页：后端不会返回 org_home，这里再兜一道，
+        // 免得万一返回了却因渲染函数不存在而抛异常，把后面的路由监听一起带停。
+        if (CONFIG.mode === "org_home" && typeof renderOrgHome === "function") { renderOrgHome(CONFIG); return; }
         return loadState().then(function () {
           // 状态接口也可能 404（活动在配置之后被归档）：同样落「页面不存在」，
           // 不给一个字段全是空的报名页。
@@ -69,7 +72,9 @@
     bindBgm(); bindSignup(); bindWalkin(); bindVerify();
     bindVenue(); bindSwipe(); bindMaterials();
     bindSuccess(); bindCalModal(); bindImgModal(); initWxSdk();
-    bindQrModal(); bindQueryPage();
+    bindQrModal();
+    // 自助查询页不在本版功能内；函数不存在就跳过，不要让它把后面的绑定全挡掉
+    if (typeof bindQueryPage === "function") bindQueryPage();
     // 咨询入口原来只在 loadConfig 的回调里绑。机构首页有两个分支根本不走
     // loadConfig（?org= 显式通道、机构域名下 config 提前返回），页脚
     // 「咨询主办方」就成了死链——这里无条件绑一次，函数内部有幂等保护。

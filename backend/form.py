@@ -115,11 +115,11 @@ def default_schema() -> list[dict]:
          "step": 1, "width": "full", "core": "phone", "need_code": True},
         # ---- 三项通用补充：默认开，可删可改；都不绑定具体行业 ----
         {"key": "company", "type": "text", "label": "单位 / 机构", "required": False,
-         "step": 1, "width": "full", "max_len": 40, "placeholder": "选填"},
+         "step": 1, "width": "full", "max_len": 40, "placeholder": ""},
         {"key": "title", "type": "text", "label": "职务 / 身份", "required": False,
-         "step": 1, "width": "half", "max_len": 40, "placeholder": "选填"},
+         "step": 1, "width": "half", "max_len": 40, "placeholder": ""},
         {"key": "email", "type": "email", "label": "邮箱", "required": False,
-         "step": 1, "width": "half", "max_len": 60, "placeholder": "选填"},
+         "step": 1, "width": "half", "max_len": 60, "placeholder": ""},
     ]
 
 
