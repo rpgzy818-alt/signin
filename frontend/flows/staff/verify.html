@@ -1,0 +1,15 @@
+    <section class="view" id="view-verify" data-route="verify">
+      <div class="vf-head">
+        <h2 class="vf-title">参会核销</h2>
+        <p class="vf-who" id="verify-who">仅已绑定的现场工作人员可进入</p>
+      </div>
+      <form id="verify-form" class="vf-form">
+        <label id="verify-token-label" class="vf-token">核销凭据（token）<input name="token" type="text" placeholder="工作人员凭据" /></label>
+        <div class="vf-scan">
+          <input name="code" id="vf-code" class="vf-code" type="text" placeholder="8 位凭证码"
+                 maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" />
+          <button type="submit" class="vf-go">查询</button>
+        </div>
+      </form>
+      <div id="verify-result" class="verify-result"></div>
+    </section>

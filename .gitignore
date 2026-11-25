@@ -20,11 +20,11 @@ uploads/
 nohup.out
 *.log
 
-# 构建产物（由 scripts/build.py 生成，不入库）
-frontend/index.html
-frontend/js/app.js
-frontend/admin/index.html
-frontend/admin/admin.js
+# 构建产物：入库
+# frontend/index.html、frontend/js/app.js、frontend/admin/ 下的产物都是
+# scripts/build.py 拼出来的，但选择入库——这样 clone 下来直接能跑，
+# 不用先装 Python 再跑构建。改了前端源码记得重新构建并一起提交：
+#   python3 scripts/build.py
 
 # 编辑器与系统
 .DS_Store

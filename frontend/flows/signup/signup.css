@@ -1,0 +1,1183 @@
+/* signup.css · 报名流：活动介绍(event/intro) → 报名(signup) → 报名成功(success)。
+ * 由 main.css 机械切分（第一刀）。规则顺序与原文件一致，未重排、未改写声明。
+ * 归位依据：#view-* 前缀 / 页面私有 id（index.html 视图边界）/ .ad-* 前缀。
+ */
+#view-success h2{text-align:center;font-size:22px;margin:0 0 5px;color:var(--ink)}
+
+/* ---- 报名成功页：凭证为主体，操作与三份领取同卡，不再多跳一层 ---- */
+#view-success.active{display:flex;flex-direction:column;justify-content:flex-start;
+  min-height:calc(100vh - 44px);min-height:calc(100dvh - 44px);padding:var(--sp-4) var(--sp-2) max(var(--sp-3), calc(var(--sp-2) + env(safe-area-inset-bottom)))}
+
+#view-success .foot{margin-top:16px}
+
+#view-success .ck-title{font-size:var(--fs-2);color:var(--ink);margin:0 0 3px;line-height:1.3}
+
+#view-success .ck-sub{margin:0 0 14px}
+
+/* 领奖页（view-reward）已废弃：三份领取内嵌到成功页与签到页，相关样式一并移除 */
+
+/* ================= 报名页重构：压缩头 + 浮动标签 ================= */
+#view-signup{padding-top:14px}
+
+#view-signup .su-title{font-size:var(--fs-3);line-height:1.35;margin:5px 0 10px;color:var(--ink);
+  letter-spacing:.2px;text-align:left}
+
+/* ================= 活动介绍页（第二页）：讲清这场会值不值得来 ================= */
+#view-event{padding-top:16px}
+
+#view-event .ev-title{font-size:var(--fs-3);line-height:1.35;margin:5px 0 6px;color:var(--ink);
+  text-align:left;letter-spacing:.2px}
+
+#view-event .ev-row{align-items:center;padding:5px 0;gap:8px}
+
+#view-event .ev-k{flex:0 0 28px}
+
+#view-event .ev-v{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap}
+
+#view-event .actions{margin:14px 0 0}
+
+/* 意向方向：一行放四项，字号收一档；名字长的两项单独落最后一行 */
+#view-signup{padding-top:18px}
+
+/* ---------- 收尾：报名页固定尾栏与键盘避让 ---------- */
+/* JS 在 visualViewport 变化时写入 --vvh；键盘弹起时整页收缩，提交按钮始终落在键盘上沿。
+   减去品牌条高度（默认 46px），否则页面会多出一段可滚动区域把尾栏顶出视口。
+   草稿态品牌条要让出 28px 给提示条，高度改为 74px，由 base.css 覆盖 --brand-h；
+   写死 46 的话这一页会被顶出 26px 的滚动条。 */
+#view-signup.active{display:flex;flex-direction:column;padding:0;
+  height:calc(var(--vvh,100dvh) - var(--brand-h,46px));overflow:hidden}
+
+#view-signup .su-page{flex:1;min-height:0;height:100%;gap:0;padding:0 var(--sp-2)}
+
+#view-signup .su-scroll{flex:1;min-height:0;padding-top:var(--sp-2)}
+
+#view-signup .su-foot{position:static;flex:0 0 auto;margin:0 calc(-1 * var(--sp-2))}
+
+#view-signup .foot{display:none}
+
+/* 小屏/键盘弹起时 flex 子项默认会被压缩，导致字段被裁切且滚不动。
+   禁止收缩后，超出部分交给 .su-scroll 的 overflow-y:auto，字段完整可滚。 */
+#view-signup .su-scroll>*{flex-shrink:0}
+
+/* 全展开后靠压缩间距保证一屏放得下，不靠折叠隐藏字段 */
+#view-signup .su-page{gap:0}
+
+#view-signup .su-scroll{gap:6px;padding-top:10px;padding-bottom:8px}
+
+#view-signup .su-foot{gap:6px;
+  padding:9px var(--sp-2) max(10px, calc(6px + env(safe-area-inset-bottom)))}
+
+#view-signup .su-progress{margin:0;line-height:1.2}
+
+#view-signup .privacy{margin:0;font-size:var(--fs-6);line-height:1.3}
+
+#view-signup .form-msg{margin:0;min-height:0;font-size:var(--fs-6)}
+
+#view-signup .fld input,#view-signup .fld-pick{
+  padding:14px 30px 5px 12px;font-size:var(--fs-4);line-height:1.25;min-height:44px}
+
+#view-signup .fld-lb{top:10px}
+
+#view-signup .fld-static{margin:2px 0 0;line-height:1.2}
+
+/* 意向方向：固定 4 列，字号收一档、禁止折行；名字长的两项各占半行 */
+#view-signup .chip-group{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:5px;margin-top:2px}
+
+#view-signup .chip-group .chip{display:flex;width:auto;flex:none;margin:0;
+  padding:5px 1px;font-size:11.5px;line-height:1.2;letter-spacing:-.3px;
+  white-space:nowrap;overflow:hidden;justify-content:center;text-align:center}
+
+#view-signup .chip-group .chip:nth-child(n+9){grid-column:span 2;padding:5px 6px}
+
+/* ========== 12-12 真机反馈：报名页舒展 + 成功页一屏化 ========== */
+
+/* 鸿蒙上浮动标签与输入值只差几像素，看着像两行叠在一起。
+   把值的起点下移、框高加一点，标签缩到顶部让出整行；
+   间距随视口高度弹性变化：大屏更舒展、小屏自动收紧，超出仍由 .su-scroll 滚动兜底，
+   不依赖某一台机器的固定高度。 */
+#view-signup .su-scroll{gap:clamp(8px,1.2dvh,12px);padding-top:12px;padding-bottom:10px}
+
+#view-signup .fld input,#view-signup .fld-pick{
+  padding:22px 30px 7px 12px;min-height:clamp(50px,6.2dvh,56px);line-height:1.35}
+
+#view-signup .fld-lb{top:16px}
+
+/* 有值/聚焦时标签必须缩回顶部：这条要比上面 #view-signup .fld-lb 更具体，
+   否则 ID 选择器会把原生的 :not(:placeholder-shown) 规则盖掉，标签压在输入值上。 */
+#view-signup .fld input:focus~.fld-lb,
+#view-signup .fld input:not([type="hidden"]):not(:placeholder-shown)~.fld-lb,
+#view-signup .fld.has-val .fld-lb,
+#view-signup .fld-pick:focus~.fld-lb{top:5px;font-size:11.5px}
+
+#view-signup .fld-static{margin-top:4px}
+
+#view-signup .chip-group{margin-top:4px}
+
+/* 成功页：尽量一屏放完。去掉本页落款，二维码按视口高度弹性缩小，
+   卡片内边距、行距与三份领取高度同步收紧。 */
+#view-success.active{padding:clamp(10px,1.6dvh,16px) var(--sp-2)
+  max(12px, calc(8px + env(safe-area-inset-bottom)))}
+
+#view-success .foot{display:none}
+
+/* margin:auto 在 flex 列里吸收多余高度 → 大屏垂直居中；
+   空间不足时 auto 自动归零，不会像 justify-content:center 那样把顶部裁掉。 */
+#view-success .ck-card{margin:auto 0;padding:clamp(10px,1.6dvh,14px) 12px}
+
+#view-success .ck-title{font-size:var(--fs-2);line-height:1.2;margin:0 0 2px}
+
+#view-success .ck-sub{margin:0 0 6px;line-height:1.3}
+
+#view-success .su-rank{margin:4px auto 8px;padding:4px 12px;line-height:1.35}
+
+#view-success .cred-block{padding:10px 12px;margin:0 0 8px}
+
+#view-success .cred-block .cred-label{margin-bottom:2px}
+
+#view-success .cred-block .credential-code{line-height:1.15}
+
+#view-success .cred-block .credential-name{margin-top:2px}
+
+#view-success .cred-block .cred-qr{margin:6px 0 0}
+
+/* 下限 84→78：矮屏那 6px 从二维码里挤，别去动字号。
+   现场有「点击放大」，78 展示尺寸不影响扫 */
+#view-success .cred-block .cred-qr svg,
+#view-success .cred-qr svg{width:clamp(78px,11dvh,100px);height:auto;aspect-ratio:1;margin-bottom:2px}
+
+#view-success .cred-qr-tip{line-height:1.3}
+
+#view-success .cred-ops{margin:0 0 6px;gap:8px}
+
+#view-success .cred-ops .btn-ghost{padding:7px 8px}
+
+#view-success .cred-edit{margin:4px 0 6px;font-size:var(--fs-6)}
+
+#view-success .ck-gifts-t{margin:0 0 10px;margin:0 0 4px}
+
+#view-success .ck-gifts .cta-card{padding:7px 12px 7px 10px;margin:0 0 4px;gap:8px}
+
+#view-success .ck-gifts .cta-body b{font-size:var(--fs-5);margin-bottom:0;line-height:1.25}
+
+#view-success .ck-gifts .cta-body small{line-height:1.25}
+
+#view-success .ck-gifts .cta-go{padding:4px 11px}
+
+/* ==================================================================
+   V2 · 表单与工具页：语法统一
+   ================================================================== */
+
+/* 报名页字段：下划线 → 卡片式，与全局卡片语法一致 */
+#view-signup .fld input,#view-signup .fld-pick{
+  background:var(--surface-soft);border:1px solid var(--accent-soft);border-radius:12px}
+
+#view-signup .fld input:focus,#view-signup .fld-pick:focus{
+  background:#fff;border-color:var(--teal);box-shadow:0 0 0 3px rgba(27,169,160,.10);outline:none}
+
+#view-signup .fld.has-val input,#view-signup .fld.has-val .fld-pick{background:#fff}
+
+/* V2 · 活动页：报名按钮进视口后吸底，滑到哪都够得着 */
+#view-event .actions{position:sticky;bottom:calc(env(safe-area-inset-bottom) + 10px);z-index:5;
+  padding:8px;margin-top:24px;border-radius:18px;
+  background:rgba(255,255,255,.90);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  box-shadow:0 8px 24px rgba(31,42,55,.10)}
+
+/* ==================================================================
+   活动介绍页重构：一屏读完，先把呼吸感做出来
+   ================================================================== */
+/* 底部留白 108 → 86：吸底按钮 70，多出的 38 在矮屏上等于白滚一截 */
+#view-event{padding:20px 16px calc(86px + env(safe-area-inset-bottom))}
+
+/* 头部：日期 / 标题 / 主办，三段各自站好 */
+#view-event .ev-head{margin:0 0 22px}
+
+#view-event .ev-date{font-size:12px;letter-spacing:2.4px;color:#4f8f95}
+
+#view-event .ev-date span{margin-left:8px;padding:2px 7px;border-radius:6px;background:#eef9f8;
+  color:var(--teal-d);font-size:11px;letter-spacing:.4px}
+
+#view-event .ev-title{font-size:21px;line-height:1.42;margin:10px 0 0;color:var(--ink);letter-spacing:.2px}
+
+#view-event .ev-title span{display:block;font-size:13px;color:#7b939e;font-weight:400;
+  margin-top:7px;letter-spacing:.4px}
+
+#view-event .ev-org{font-size:11.5px;color:#93a8b2;margin:10px 0 0;letter-spacing:.3px}
+
+/* 数字条：去掉第三格后两格更舒展 */
+#view-event .ev-nums{margin:0 0 22px;padding:18px 0;border-radius:14px}
+
+#view-event .ev-nums div{flex:1}
+
+#view-event .ev-nums b{font-size:27px;letter-spacing:.5px}
+
+#view-event .ev-nums b em{font-style:normal;font-size:17px;font-weight:800;margin-left:1px}
+
+#view-event .ev-nums small{margin-top:5px;font-size:11.5px;letter-spacing:.5px}
+
+/* 面板：把内边距和间距都放开一档 */
+#view-event .ev-panel{margin:0 0 16px;padding:16px 16px 14px;border-radius:14px}
+
+#view-event .ev-panel-t{font-size:13.5px;margin:0 0 12px;letter-spacing:.2px}
+
+#view-event .ev-blocks{gap:10px}
+
+#view-event .ev-blocks div{padding:11px 12px;border-radius:10px}
+
+#view-event .ev-blocks b{font-size:13px}
+
+#view-event .ev-blocks span{font-size:11.5px;margin-top:4px;line-height:1.5}
+
+/* 时间地点：Emoji 打头、文字分两行、按钮统一尺寸且不贴边 */
+#view-event .ev-when{padding:4px 16px 16px}
+
+#view-event .ev-row{align-items:center;gap:12px;padding:13px 0}
+
+#view-event .ev-row+.ev-row{border-top:1px solid #f2f7f9}
+
+#view-event .ev-ic{flex:0 0 auto;width:20px;font-size:16px;line-height:1;text-align:center}
+
+#view-event .ev-main{flex:1;min-width:0}
+
+#view-event .ev-main .ev-k{display:block;font-size:11px;color:#5b727a;
+  letter-spacing:1.2px;margin-bottom:3px}
+
+#view-event .ev-main .ev-v{display:block;font-size:13.5px;color:var(--ink);
+  line-height:1.45;font-weight:500}
+
+#view-event .su-act{flex:0 0 auto;min-width:76px;height:34px;padding:0 14px;border-radius:17px;
+  font-size:12.5px;font-weight:500;margin-left:8px;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:background .15s,transform .12s}
+
+#view-event .su-act:active{transform:scale(.96);background:#e8f8f7}
+
+/* 时间轴：三个节点连成一条线，比一行小字清楚得多 */
+#view-event .ev-tl{display:flex;position:relative;margin:8px 0 0;padding:22px 0 2px}
+
+#view-event .ev-tl::before{content:"";position:absolute;left:16.6%;right:16.6%;top:26px;
+  height:1px;background:#cfe9e7}
+
+#view-event .ev-tl-i{flex:1;text-align:center;position:relative;z-index:1}
+
+#view-event .ev-tl-i::before{content:"";display:block;width:9px;height:9px;margin:0 auto 10px;
+  border-radius:50%;background:#fff;border:2px solid var(--teal);box-sizing:border-box}
+
+#view-event .ev-tl-i:first-child::before{background:var(--teal);
+  box-shadow:0 0 0 3px rgba(27,169,160,.14)}
+
+#view-event .ev-tl-i b{display:block;font-size:12.5px;color:var(--teal-d);letter-spacing:.3px}
+
+#view-event .ev-tl-i span{display:block;font-size:11px;color:#5b727a;margin-top:3px}
+
+/* 报名按钮：吸底 + 一轮一弹，幅度比导流区更小（它是主按钮，不需要喊） */
+#view-event .actions{margin:0;padding:8px;border-radius:20px}
+
+#view-event .actions .btn-primary{animation:evPop 3.4s cubic-bezier(.34,1.56,.64,1) infinite}
+
+/* ==================================================================
+   活动页真机修正：时间换行、图标稳、时间轴重排、吸底栏收干净
+   ================================================================== */
+
+/* 图标：不再依赖系统 Emoji 字体（华为上会漂移并多出空圈），改内联 SVG */
+#view-event .ev-ic{flex:0 0 auto;width:20px;height:20px;display:flex;align-items:center;
+  justify-content:center;color:var(--teal)}
+
+#view-event .ev-ic svg{width:17px;height:17px;fill:none;stroke:currentColor;
+  stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+/* 时间值允许换行，不再被挤成「9:00—1…」 */
+#view-event .ev-main .ev-v{white-space:normal;overflow:visible;text-overflow:clip;
+  font-size:13.5px;line-height:1.5}
+
+/* 时间轴：时间直接压在轴线上，备注落在时间下方 */
+#view-event .ev-tl{display:flex;position:relative;margin:14px 0 0;padding:12px 0 2px}
+
+#view-event .ev-tl::before{content:"";position:absolute;left:9%;right:9%;top:22px;
+  height:1px;background:#cfe9e7}
+
+#view-event .ev-tl-i{flex:1;text-align:center;position:relative}
+
+#view-event .ev-tl-i b{display:inline-block;position:relative;z-index:1;background:#fff;
+  padding:0 9px;font-size:13px;font-weight:700;line-height:1.35;color:var(--teal-d);
+  letter-spacing:.3px}
+
+#view-event .ev-tl-i:first-child b{background:var(--teal);color:#fff;border-radius:11px;
+  box-shadow:0 3px 8px rgba(27,169,160,.22)}
+
+#view-event .ev-tl-i span{display:block;font-size:11px;color:#5b727a;margin-top:6px}
+
+/* 吸底栏：去掉悬浮托盘，做成贴底的操作栏，上方渐隐过渡 */
+#view-event .actions{position:sticky;bottom:0;z-index:6;margin:0 -16px;padding:10px 16px;
+  padding-bottom:calc(10px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,.95) 26%,#fff 60%);
+  border-radius:0;box-shadow:none;backdrop-filter:none}
+
+/* ==================================================================
+   活动页：整屏一屏装下，按钮固定吸底，内容不滚动
+   做法：纵向间距全部 clamp 到 vh，屏幕矮就自动收紧，不靠死值
+   ================================================================== */
+#view-event{padding:14px 16px calc(86px + env(safe-area-inset-bottom))}
+
+#view-event .ev-head{margin:0 0 clamp(9px,1.7vh,18px)}
+
+#view-event .ev-date{font-size:11.5px;letter-spacing:2.2px}
+
+#view-event .ev-title{font-size:clamp(18px,4.6vw,21px);line-height:1.34;margin:8px 0 0}
+
+#view-event .ev-title span{font-size:12.5px;margin-top:5px}
+
+#view-event .ev-org{display:none}
+
+#view-event .ev-nums{padding:clamp(9px,1.7vh,16px) 0;
+  margin:0 0 clamp(9px,1.7vh,16px);border-radius:13px}
+
+#view-event .ev-nums b{font-size:clamp(21px,5.8vw,26px)}
+
+#view-event .ev-nums b em{font-size:clamp(13px,3.6vw,16px)}
+
+#view-event .ev-nums small{margin-top:3px;font-size:11px}
+
+#view-event .ev-panel{padding:clamp(10px,1.7vh,15px) 14px;
+  margin:0 0 clamp(9px,1.5vh,14px);border-radius:13px}
+
+#view-event .ev-panel-t{font-size:13px;margin:0 0 clamp(6px,1.1vh,10px)}
+
+#view-event .ev-blocks{gap:clamp(6px,1.1vh,9px)}
+
+#view-event .ev-blocks div{padding:clamp(7px,1.3vh,10px) 10px;border-radius:9px}
+
+#view-event .ev-blocks b{font-size:12.5px}
+
+#view-event .ev-blocks span{font-size:10.5px;margin-top:2px;line-height:1.45}
+
+#view-event .ev-when{padding:clamp(2px,0.6vh,4px) 14px clamp(10px,1.4vh,14px)}
+
+#view-event .ev-row{padding:clamp(7px,1.3vh,11px) 0;gap:11px}
+
+#view-event .ev-main .ev-k{font-size:10.5px;letter-spacing:1px;margin-bottom:2px}
+
+#view-event .ev-main .ev-v{font-size:13px;line-height:1.45}
+
+#view-event .su-act{min-width:72px;height:32px;border-radius:16px;font-size:12px}
+
+/* 时间轴：数字直接压在线上，线在数字两侧断开 */
+#view-event .ev-tl{margin:clamp(4px,0.9vh,10px) 0 0;padding:10px 0 0}
+
+#view-event .ev-tl::before{left:7%;right:7%;top:19px;height:1px;background:#bfe0dd}
+
+#view-event .ev-tl-i b{padding:0 10px;font-size:12.5px;line-height:1.4}
+
+#view-event .ev-tl-i span{font-size:10.5px;margin-top:4px}
+
+/* 报名按钮：固定吸底（不是 sticky），页面内容不再为它让位滚动 */
+#view-event .actions{position:fixed;left:0;right:0;bottom:0;z-index:20;margin:0 auto;
+  max-width:480px;padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,.96) 24%,#fff 55%);
+  border-radius:0;box-shadow:none}
+
+/* 时间轴去掉旧圆点：数字本身就是线上的节点，不再另画点 */
+#view-event .ev-tl-i::before{display:none;content:none}
+
+#view-event .ev-tl-i b{position:relative;top:-1px}
+
+/* 一屏内纵向均分：内容不足一屏时不要全堆在上面，靠 space-between 把空白摊到块与块之间 */
+#view-event.active{display:flex;flex-direction:column;
+  min-height:calc(100vh - 44px);min-height:calc(100dvh - 44px)}
+
+#view-event.active>*{flex:0 0 auto}
+
+#view-event.active .ev-head,
+#view-event.active .ev-nums,
+#view-event.active .ev-panel{margin-bottom:0}
+
+#view-event.active{justify-content:space-between}
+
+/* 交给 space-between 纯分配，不再叠额外内边距，大屏上间隙才均匀 */
+#view-event.active .ev-head{padding-bottom:0;margin-bottom:clamp(10px,1.6vh,16px)}
+
+#view-event.active .ev-nums{padding-bottom:clamp(9px,1.7vh,16px)}
+
+#view-event.active .ev-panel{margin-bottom:clamp(9px,1.5vh,14px)}
+
+/* 两个 pane 都是滚动容器；[hidden] 必须显式 display:none，
+   否则 flex 容器会让隐藏面板继续占位（demo 阶段踩过） */
+#view-signup .step-pane{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  display:flex;flex-direction:column;gap:clamp(8px,1.2dvh,12px);
+  padding-top:12px;padding-bottom:10px}
+
+#view-signup .step-pane[hidden]{display:none}
+
+#view-signup .step-pane>*{flex-shrink:0}
+
+/* 国际区号：外框当卡片，内部输入框去边框，避免与 #view-signup .fld input 的卡片样式叠加 */
+#view-signup .cc-fld .cc-wrap{position:relative;display:flex;align-items:center;gap:1px;
+  box-sizing:border-box;border:1px solid var(--accent-soft);border-radius:12px;background:var(--surface-soft);
+  padding:20px 10px 6px 12px;min-height:clamp(50px,6.2dvh,56px)}
+
+#view-signup .cc-fld .cc-wrap:focus-within{border-color:var(--teal);background:#fff;
+  box-shadow:0 0 0 3px rgba(27,169,160,.10)}
+
+#view-signup .cc-fld .cc-wrap input{flex:1 1 auto!important;width:auto!important;
+  height:auto!important;min-height:0!important;
+  border:0!important;border-radius:0!important;background:transparent!important;
+  box-shadow:none!important;padding:0!important;margin:0;
+  font-size:16px;line-height:1.2;color:var(--body);outline:none;
+  -webkit-appearance:none;appearance:none}
+
+/* 区号始终有值，标签固定吸顶，不做浮动 */
+#view-signup .cc-fld .fld-lb{left:12px;top:7px;font-size:11.5px;color:#8a97a5}
+
+#view-signup .cc-fld.focus .fld-lb{color:var(--teal)}
+
+/* 海外经历这一行只有标题，不需要两端对齐 */
+#overseas-block .fld-static{display:block;margin-top:4px}
+
+#overseas-block .fld-static .req,
+/* P3-b：表单字段由 schema 渲染，不再有固定的 #overseas-block 包裹，
+   星号样式按「报名页里的静态标题行」给，别绑在某个字段的 id 上 */
+#view-signup .fld-static .req{color:var(--coral);font-weight:400;margin-left:2px}
+
+/* ==================================================================
+   v83 · 报名两步的自适应：默认铺满一屏 / 海外选「是」自动收缩 / 第二步压进一屏
+   搬 demo-signup 的 --fh 体系：字段高度按视口高度弹性，间距与实际高度解耦，
+   小屏自动收紧、大屏自然舒展，不靠某一台机器的固定像素。
+   ================================================================== */
+
+/* 第一步：字段均匀铺满，而不是挤在上面 */
+#view-signup #su-pane1{
+  justify-content:space-evenly;
+  gap:clamp(8px,1.4vh,16px);
+  --fh:clamp(46px,6.6vh,60px);
+}
+
+#view-signup #su-pane1 .fld input,
+#view-signup #su-pane1 .fld-pick,
+#view-signup #su-pane1 .cc-fld .cc-wrap{
+  height:var(--fh);
+  min-height:var(--fh);
+  transition:height .3s cubic-bezier(.22,1,.36,1),min-height .3s cubic-bezier(.22,1,.36,1);
+}
+
+/* 高度变小后标签与值要跟着收，否则会叠在一起 */
+#view-signup #su-pane1 .fld input,
+#view-signup #su-pane1 .fld-pick{padding-top:clamp(18px,2.3vh,22px);padding-bottom:6px}
+
+#view-signup #su-pane1 .fld-lb{top:clamp(11px,1.55vh,16px)}
+
+#view-signup #su-pane1 .cc-fld .cc-wrap{padding-top:clamp(17px,2.2vh,21px);padding-bottom:5px}
+
+#view-signup #su-pane1 .cc-fld .fld-lb{top:clamp(5px,0.8vh,8px)}
+
+/* 海外选「是」：多出一整块国家网格，整页压矮一档，保证仍是一屏 */
+#view-signup #su-pane1.tight{
+  justify-content:flex-start;
+  gap:clamp(6px,1vh,11px);
+  --fh:clamp(38px,4.8vh,46px);
+}
+
+#view-signup #su-pane1.tight .seg2 button{height:var(--fh)}
+
+#view-signup #su-pane1.tight .grid4 button{height:clamp(30px,3.9vh,36px)}
+
+#view-signup #su-pane1.tight .grid4{gap:clamp(4px,0.6vh,6px);margin-top:clamp(4px,0.7vh,8px)}
+
+#view-signup #su-pane1.tight .seg2{margin-top:clamp(3px,0.6vh,6px)}
+
+/* 第二步：当前状态 + 17 类意向 + 说明 + 返回，全部压进一屏不滚动 */
+#view-signup #su-pane2{justify-content:flex-start;gap:clamp(6px,1vh,11px)}
+
+#view-signup #su-pane2 .fld input,
+#view-signup #su-pane2 .fld-pick{height:clamp(44px,5.6vh,52px);min-height:clamp(44px,5.6vh,52px)}
+
+#view-signup #su-pane2 .sec-t{margin:clamp(2px,0.5vh,6px) 0 0}
+
+#view-signup #su-pane2 .grid2{gap:clamp(5px,0.75vh,8px);margin-top:clamp(5px,0.8vh,9px)}
+
+#view-signup #su-pane2 .gcell{min-height:clamp(34px,4.3vh,42px);padding:4px 6px;font-size:clamp(12px,3.3vw,13px)}
+
+#view-signup #su-pane2 .help-hint{margin:clamp(4px,0.7vh,8px) 0 0;padding:clamp(5px,0.8vh,8px) 10px;font-size:11px}
+
+#view-signup #su-pane2 .back-link{padding:clamp(2px,0.4vh,6px) 0;font-size:12px}
+
+/* 内容少于容器时也要铺满：space-evenly 在溢出时不生效，正好自然退化成可滚动 */
+#view-signup #su-pane1.tight{justify-content:space-evenly}
+
+#view-signup #su-pane2{justify-content:space-evenly}
+
+/* 第二步内容比第一步少，格子放大一档把底部空白吃回来（小屏由 clamp 下限自动收紧） */
+#view-signup #su-pane2 .grid2{gap:clamp(5px,0.85vh,9px)}
+
+#view-signup #su-pane2 .gcell{min-height:clamp(38px,5vh,46px)}
+
+/* 矮屏（667 一档）兜底：格子与说明再收一档，让第二步尽量不用滚 */
+#view-signup #su-pane2 .gcell{min-height:clamp(34px,5vh,46px)}
+
+#view-signup #su-pane2 .grid2{gap:clamp(4px,0.85vh,9px)}
+
+#view-signup #su-pane2 .help-hint{margin-top:clamp(3px,0.6vh,8px);padding:clamp(4px,0.7vh,8px) 10px}
+
+/* ==================================================================
+   v88 修正：字段压矮后标签与输入值重叠
+   原因：v83 把 .fld-lb 的 top 也一起改了（clamp 11—16px），把原有
+   「有值时吸顶到 5px」的规则盖掉，于是标签停在 13—16px、值从 18px 起，直接压在一起。
+   正确做法：标签位置沿用原规则（无值 16px / 有值 5px），只把字段高度下限
+   提到「吸顶标签 19px + 值行 22px + 底距 5px ≈ 46px」，留出 2—3px 间隙。
+   ================================================================== */
+#view-signup #su-pane1{--fh:clamp(52px,6.6vh,62px)}
+
+#view-signup #su-pane1.tight{--fh:clamp(48px,5.6vh,54px)}
+
+#view-signup #su-pane1 .fld input,
+#view-signup #su-pane1 .fld-pick{padding-top:clamp(21px,2.3vh,23px);padding-bottom:5px}
+
+/* 无值：标签居中偏上（回到原值） */
+#view-signup #su-pane1 .fld-lb{top:16px}
+
+/* 有值/聚焦：标签吸顶（必须比上一条更具体，否则被盖掉） */
+#view-signup #su-pane1 .fld input:focus~.fld-lb,
+#view-signup #su-pane1 .fld input:not([type="hidden"]):not(:placeholder-shown)~.fld-lb,
+#view-signup #su-pane1 .fld.has-val .fld-lb,
+#view-signup #su-pane1 .fld-pick:focus~.fld-lb{top:5px;font-size:11.5px}
+
+/* 区号框：标签常驻小字，给足上边距 */
+#view-signup #su-pane1 .cc-fld .cc-wrap{padding-top:clamp(21px,2.35vh,24px);padding-bottom:6px}
+
+#view-signup #su-pane1 .cc-fld .fld-lb{top:7px;font-size:11.5px}
+
+/* ==================================================================
+   v90 · 活动页改为顺序排列
+   space-between 会把剩余空间平均塞进模块之间，高屏下每处能到 130—160px，
+   看着像断层；内容本身并不会因此变饱满。改成从顶部顺序排，
+   剩余空间留在底部（被吸底报名栏和它的渐隐遮住），模块间距固定、均匀。
+   ================================================================== */
+#view-event.active{justify-content:flex-start}
+
+#view-event.active .ev-nums{margin-bottom:clamp(12px,2vh,20px)}
+
+#view-event.active .ev-panel{margin-bottom:clamp(12px,2vh,20px)}
+
+/* v91 回滚 v90 的判断：内容顺序排会把剩余空间全堆到底部（956 下近 330px），
+   比模块间均分更空。恢复均匀分配，靠 v89 的放大把每段空隙压回 40—90px。 */
+#view-event.active{justify-content:space-between}
+
+#view-event.active .ev-nums,
+#view-event.active .ev-panel{margin-bottom:0}
+
+/* ==================================================================
+   v98 · 活动页按文档：50+ 企业、五大模块（2+2+1）、时间轴改签到/开始/结束
+   多出一行模块，五格版收紧字与内边距，保证仍是一屏
+   ================================================================== */
+#view-event .ev-blocks.five{grid-template-columns:1fr 1fr;gap:clamp(5px,0.8vh,8px)}
+
+#view-event .ev-blocks.five .wide{grid-column:1/-1}
+
+#view-event .ev-blocks.five div{padding:clamp(6px,1vh,9px) 10px;border-radius:8px}
+
+#view-event .ev-blocks.five b{font-size:clamp(11.5px,1.35vh,13px);margin-bottom:1px}
+
+#view-event .ev-blocks.five span{font-size:clamp(9.5px,1.1vh,11px);line-height:1.35;margin-top:1px}
+
+#view-event .ev-blocks.five .wide{display:flex;align-items:center;justify-content:center;gap:8px}
+
+#view-event .ev-blocks.five .wide b{margin:0;flex:0 0 auto}
+
+#view-event .ev-blocks.five .wide span{margin:0}
+
+/* ==================================================================
+   v99 · CTA 按 R-m-1113：压缩顶部状态提示，加重领卡引导
+   领卡已前置到成功/签到/状态首卡；这里把首卡做成主按钮级视觉重量，
+   其余两张保持次级；状态区字号与间距再收一档。
+   ================================================================== */
+/* 状态提示压缩 */
+#view-success .ck-card{padding-top:clamp(10px,1.8vh,18px)}
+
+/* —— 3. 活动页：数字跳数（JS）→ 模块卡逐个浮现 → 时间轴从左点亮 —— */
+#view-event.active .ev-blocks div{animation:iUp .44s var(--ease) both}
+
+#view-event.active .ev-blocks div:nth-child(1){animation-delay:.18s}
+
+#view-event.active .ev-blocks div:nth-child(2){animation-delay:.24s}
+
+#view-event.active .ev-blocks div:nth-child(3){animation-delay:.30s}
+
+#view-event.active .ev-blocks div:nth-child(4){animation-delay:.36s}
+
+#view-event.active .ev-blocks div:nth-child(5){animation-delay:.42s}
+
+#view-event.active .ev-tl::before{transform-origin:left center;animation:iGrowL .72s .30s var(--ease) both}
+
+#view-event.active .ev-tl-i::before{animation:iPop .42s var(--ease-back) both}
+
+#view-event.active .ev-tl-i:nth-child(1)::before{animation-delay:.34s}
+
+#view-event.active .ev-tl-i:nth-child(2)::before{animation-delay:.52s}
+
+#view-event.active .ev-tl-i:nth-child(3)::before{animation-delay:.70s}
+
+#view-event.active .ev-tl-i b,
+#view-event.active .ev-tl-i span{animation:iFade .4s var(--ease) both}
+
+#view-event.active .ev-tl-i:nth-child(1) b,#view-event.active .ev-tl-i:nth-child(1) span{animation-delay:.38s}
+
+#view-event.active .ev-tl-i:nth-child(2) b,#view-event.active .ev-tl-i:nth-child(2) span{animation-delay:.56s}
+
+#view-event.active .ev-tl-i:nth-child(3) b,#view-event.active .ev-tl-i:nth-child(3) span{animation-delay:.74s}
+
+/* ==================================================================
+   v106 · 活动页按 R-m-1113 对齐
+   两处偏离文档：
+   ① 数据模块写成「50+」——文档是「预设约 50 家」；数字也偏小，文档明确要放大
+   ② 五大模块是 2+2+1，第五块独占一整行：五块本该并列，这样读起来像
+      「四个重点区 + 一个补充」，而且第五块文字只有一行、右边一大片空
+   改法：数字主体放到 34，「约／家」降为前后缀小字；五块改纵向等权列表，
+   序号 01—05 立起顺序，细线分隔，五个模块一眼看全是五个。
+   ================================================================== */
+#view-event .ev-nums{margin-bottom:16px;padding:14px 0}
+
+#view-event .ev-nums b{display:flex;align-items:baseline;justify-content:center;
+  font-size:34px;line-height:1.06;letter-spacing:0}
+
+#view-event .ev-nums b i,#view-event .ev-nums b em{transform:translateY(-1.5px)}
+
+#view-event .ev-nums b i{font-style:normal;font-size:15px;font-weight:600;
+  margin-right:2px;opacity:.9}
+
+#view-event .ev-nums b em{font-style:normal;font-size:20px;font-weight:800;margin-left:1px}
+
+#view-event .ev-nums small{margin-top:7px;font-size:12px;letter-spacing:.6px}
+
+#view-event .ev-blocks.five{display:flex;flex-direction:column;gap:0}
+
+#view-event .ev-blocks.five div{display:grid;grid-template-columns:15px 1fr;
+  grid-template-rows:auto auto;column-gap:7px;align-items:start;
+  padding:8px 0;background:none;border:0;border-radius:0}
+
+#view-event .ev-blocks.five div+div{border-top:1px solid #e9f3f4}
+
+#view-event .ev-blocks.five div>i{grid-row:1/3;font-style:normal;
+  font-size:11px;font-weight:700;color:#57a8a2;
+  line-height:1.82;font-variant-numeric:tabular-nums}
+
+#view-event .ev-blocks.five b{grid-column:2;margin:0;font-size:13px;
+  color:#12454b;line-height:1.5;letter-spacing:.2px}
+
+#view-event .ev-blocks.five span{grid-column:2;margin-top:3px;
+  font-size:11.5px;color:#75909a;line-height:1.5;letter-spacing:.1px}
+
+/* 面板上下内边距收一档，五块纵向排下来仍是一屏 */
+#view-event .ev-panel{padding:14px 16px 13px}
+
+#view-event .ev-panel-t{margin:0 0 6px;font-size:12px;letter-spacing:1.2px;
+  color:#5b7f89;font-weight:600}
+
+/* 375 及以下：时间行会挤到按钮边上，「9:00—」被留在上一行、「16:00」掉下去。
+   把时间段锁成一个整体，让折行只发生在「（周日）」之后。 */
+#view-event .ev-main .ev-v i{font-style:normal;white-space:nowrap}
+
+/* v90/v91 用 space-between 把所有余量均分到模块之间，margin 被清成 0。
+   v106 五块改纵向后内容刚好填满容器，余量归零 —— 数字条和面板直接贴在一起，
+   两个圆角卡片的边挤出一条缝。这里给回最小间距，余量不足时宁可让页面滚几像素。 */
+#view-event.active .ev-nums{margin-bottom:12px}
+
+#view-event.active .ev-panel{margin-bottom:12px}
+
+#view-event.active .ev-when{margin-bottom:0}
+
+/* ==================================================================
+   v108 · 五大板块改回卡片模块（按 11-16 确认）
+   标注图只借它的「呈现形式」——2×2 小卡片；顶部两个数字与「会议名+日期
+   已删」两处保持现状，不回到旧版。第五块是奇数，用通栏卡 + 右侧标签收口，
+   不做成「四个重点 + 一个补充」；序号做成淡青底纹数字，只当锚点不当编号读。
+   ================================================================== */
+#view-event .ev-blocks.five{display:grid;grid-template-columns:1fr 1fr;
+  grid-auto-rows:1fr;gap:8px;align-items:stretch}
+
+/* display:block 必须写：v106 把卡片设成 grid（15px 序号列 + 1fr），
+   只覆盖 background/border 不改 display，内容框会缩成 99px、文字提前折行 */
+#view-event .ev-blocks.five div{display:block;position:relative;overflow:hidden;
+  background:linear-gradient(180deg,#fbfdfd 0%,#f6fbfb 100%);
+  border:1px solid #e8f3f3;border-radius:11px;
+  padding:10px 11px 11px;box-shadow:0 1px 2px rgba(15,90,102,.035)}
+
+#view-event .ev-blocks.five div+div{border-top:1px solid #e8f3f3}
+
+/* 淡青底纹序号：22px、16% 透明，压在右上角，是装饰不是编号 */
+#view-event .ev-blocks.five div>i{display:block;position:absolute;
+  top:4px;right:8px;font-style:normal;font-size:22px;font-weight:800;
+  line-height:1;letter-spacing:-.5px;color:var(--teal-glow);
+  font-variant-numeric:tabular-nums;pointer-events:none}
+
+#view-event .ev-blocks.five b{display:block;margin:0;padding-right:26px;
+  font-size:13px;font-weight:600;line-height:1.45;letter-spacing:.2px;color:#0f5a66}
+
+#view-event .ev-blocks.five span{display:block;margin-top:4px;font-size:11.5px;
+  color:#7d97a1;line-height:1.45;letter-spacing:.1px;text-wrap:balance}
+
+/* 通栏卡右侧是标签，序号压上去会被胶囊盖住一半，这一块不要序号 */
+#view-event .ev-blocks.five div:last-child>i{display:none}
+
+/* 第五块通栏：标题在左，三个标签把右侧吃掉。
+   v124：padding 不再单写，交回 .five div —— 否则三档 media 的内距收缩
+   都会被这条更高特异性的规则挡住（667 屏实测 01—04 是 6/10，05 还停在 9/11） */
+#view-event .ev-blocks.five div:last-child{grid-column:1/-1;
+  display:flex;align-items:center;gap:7px}
+
+#view-event .ev-blocks.five div:last-child b{padding-right:0;flex:0 0 auto}
+
+#view-event .ev-blocks.five div:last-child em{font-style:normal;
+  font-size:11px;line-height:1;color:var(--teal-2);background:#eaf7f5;
+  border:1px solid #d8eeeb;border-radius:20px;padding:5px 9px;white-space:nowrap}
+
+#view-event .ev-blocks.five div:last-child em:first-of-type{margin-left:auto}
+
+/* 一屏：卡片比五行列表高，从面板内距和数字条里抠回来 */
+#view-event .ev-panel{padding:13px 14px 13px}
+
+#view-event .ev-panel-t{margin:0 0 9px}
+
+/* ==================================================================
+   v109 · 五大板块按 11-16 第二版参考图（大序号 + 标题 + 两行正文）
+   参考图的排版是「左侧大序号，标题和正文整块右移」。375 屏每卡内容宽
+   只有 131px，正文跟着右移 39px 就只剩 92px、11px 字号每行 8 个字，
+   文档原话 21 字要折 3 行，一屏压不住。所以只让序号压标题那一行的高度，
+   正文从卡片左内距满宽起排：序号仍是 30px 的大号淡青水印（视觉占卡片
+   宽度约 1/5，和参考图的比例接近），文档原话每行 11 字、正好两行。
+   数字条保持现状（橘红 var(--coral) + 中间竖线），本段不碰。
+   ================================================================== */
+
+/* v108 这条是纵向列表时期的残留：卡片自带边框后，相邻卡会多一条内线 */
+#view-event .ev-blocks.five div+div{border-top:0}
+
+#view-event .ev-blocks.five div{padding:10px 10px 11px}
+
+/* 序号：左上角大号水印，行高锁 1，高度必须 ≤ 标题行底，
+   否则会压到正文第一行。30px 是 375 屏上的上限，再大字就进正文了。 */
+#view-event .ev-blocks.five div>i{display:block;position:absolute;left:1px;top:0;
+  right:auto;   /* 必须写：v108 的 right:8px 还在，只给 left 会变成左右都锚定、宽度撑满整卡 */
+  font-size:30px;font-weight:800;line-height:1;letter-spacing:-1.6px;
+  color:rgba(27,169,160,.15);font-variant-numeric:tabular-nums;pointer-events:none}
+
+#view-event .ev-blocks.five b{padding-left:41px;padding-right:0;
+  font-size:13px;line-height:1.42;letter-spacing:.2px;color:#0f5a66}
+
+#view-event .ev-blocks.five span{margin-top:3px;font-size:11.5px;
+  line-height:1.42;letter-spacing:.1px;color:#7d97a1;text-wrap:pretty}
+
+/* 05 通栏照图同款：序号在左，「标题 + 三个胶囊」同一行，底部文案另起一行。
+   序号缩进压到 28px（26px 序号宽约 29，轻微叠 1px 在淡色水印上不伤文字），
+   胶囊 10.5px + gap 4，一行才放得下：
+   28 + 标题 62 + 4 + 三胶囊 158 + 8 = 260 < 通栏内容宽 269。 */
+#view-event .ev-blocks.five div:last-child{display:flex;flex-wrap:wrap;
+  align-items:center;gap:0 4px}
+
+#view-event .ev-blocks.five div:last-child>i{display:block}
+
+#view-event .ev-blocks.five div:last-child b{flex:0 0 auto;padding-left:28px;padding-right:0}
+
+#view-event .ev-blocks.five div:last-child em:first-of-type{margin-left:0}
+
+#view-event .ev-blocks.five div:last-child em{font-size:10.5px;padding:4px 8px}
+
+/* 05 底部文案独占最后一行（v124 起字度量交给 .five span 统一规则，此处只留占位） */
+
+/* ==================================================================
+   v110 · 回到一行，把一屏还回来
+   v109 把正文加到 20 字，375 屏每块折 3 行，整页超出一屏 —— 参考图里
+   那些灰条只是占位示意，真填 20 字就是这个结果。这里正文收到 12 字以内，
+   一行不断；同时把按钮托起来，不再贴着屏幕底（微信底部工具栏会盖住它）。
+   ================================================================== */
+
+/* 按钮离屏幕底留 22px：微信底部工具栏约 50px，sticky 只有 10px 时会被吃掉一半。
+   放在 media 之外，高屏 space-between 有余量时同样生效。 */
+#view-event.active .actions{margin-bottom:16px}
+
+/* 正文一行：不加 nowrap（超宽会被 overflow:hidden 裁字），靠字数控制在宽度内 */
+#view-event .ev-blocks.five span{text-wrap:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* 余量别摊成模块间的洞：让面板吃掉它，三行卡片按 1fr 平分、内容顶部对齐。
+   375 上原本数字卡与面板之间、面板与时间卡之间各有 60px 的空洞，
+   收进卡片后整页变成「三张卡 + 吸底按钮」，和参考图的节奏一致。 */
+#view-event.active .ev-panel{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+
+#view-event.active .ev-blocks.five{flex:1 1 auto;min-height:0;grid-auto-rows:1fr}
+
+/* 内容顶部对齐：序号是 absolute 在左上，一居中正文就压到数字上 */
+#view-event .ev-blocks.five div{display:flex;flex-direction:column;justify-content:center}
+
+/* 内容居中后标题会下移，序号必须跟着走 —— 用 50% 定位，再用内容半高补偿。
+   字号收到 20px：30px 时序号底部比标题行低 20px，实测压进正文第一行 16px，
+   而正文是满宽不缩进的，于是「休息饮水」直接叠在水印上。
+   缩到 20px 并把 top 再上提 6px，水印只占标题行，正文一行到底不受影响。 */
+#view-event .ev-blocks.five div>i{top:calc(50% - 30px);left:5px;transform:none;
+  font-size:20px;letter-spacing:-1px}
+
+#view-event .ev-blocks.five div:last-child{display:flex;flex-direction:row;flex-wrap:wrap;
+  align-content:center;justify-content:flex-start}
+
+#view-event .ev-blocks.five div:last-child>i{top:calc(50% - 30px);font-size:20px}
+
+/* 05 内容垂直居中：与 01—04 的 justify-content:center 同一套。
+   v124：原来是 flex-start，卡被拉高后内容顶在上面、序号锚点却按 50% 算，
+   两者一错位，「05」就跑到卡片外沿去了 */
+#view-event .ev-blocks.five div:last-child{align-content:center}
+
+/* ==================================================================
+   v111 · 排版度量定稿
+   五块是「序号压标题行 + 正文满宽一行」的结构，所以纵向节奏只有三档：
+   标题行、标题↔正文、正文↔卡底。之前挤是因为三档都被压到 2—3px。
+   这里按 4px 梯度统一：卡内 9/11、标题↔正文 4、卡间距 8。
+   字号：标题 13（字距 .2）、正文 11.5（行高 1.5）。矮屏各降 0.5。
+   ================================================================== */
+#view-event .ev-blocks.five div{padding:9px 11px 10px}
+
+#view-event .ev-blocks.five b{font-size:13px;line-height:1.4;letter-spacing:.2px}
+
+#view-event .ev-blocks.five span{margin-top:4px;font-size:11.5px;line-height:1.5;letter-spacing:.1px}
+
+#view-event .ev-blocks.five{gap:8px}
+
+#view-event .ev-panel{padding:13px 14px 14px}
+
+#view-event .ev-panel-t{margin:0 0 9px;font-size:12px;letter-spacing:1px;color:#5b7f89}
+
+/* 05 的胶囊字号跟着正文走，别比正文还小 */
+#view-event .ev-blocks.five div:last-child em{font-size:10.5px;padding:4px 8px}
+
+/* v124：05 正文颜色随 .five span 统一为 #7d97a1，不再单独加深 */
+
+/* ==================================================================
+   v113 · 五块文案按 R-m-1113 写全，自然折行
+   01—04 每块 21—23 字，375 屏每行 12 字，自然折成两行；
+   05 的标题、胶囊、底行文案统一缩进到 38（= 01/03 的标题左边界），
+   整块与左侧一列对齐 —— 之前 05 缩进 28，比 01/03 缩进一格。
+   ================================================================== */
+#view-event .ev-blocks.five span{text-wrap:pretty;white-space:normal;overflow:visible;
+  text-overflow:clip;line-height:1.55}
+
+/* 05：标题独占一行（与 01—04 同缩进），胶囊一行，文案一行 */
+#view-event .ev-blocks.five div:last-child b{flex:0 0 100%;padding-left:41px}
+
+#view-event .ev-blocks.five div:last-child em:first-of-type{margin-left:41px}
+
+/* v124：05 文案缩进取消，随 .five span 满宽起排（与 01—04 同左边界） */
+
+/* v124：左内距不再单写（原 10/11 两条一路打架），随 .five div 统一为 11/10 */
+
+/* 试过用 bdi + nowrap 保护「洽谈」不被拆开，结果卡片全部涨到 3 行、
+   375 屏溢出 42px —— 宁可断在词中间，也不能破坏一屏。改动已回退。 */
+/* v124：05 文案字号交由 .five span 的三档 media 统一收缩，不再写死 11.5 */
+
+/* ==================================================================
+   v114 · 05 压回两行：标题与胶囊同行，文案与 01—04 正文同左边
+   量出来的旧账（390×844）：标题 y409 h18 → 胶囊 y427 h21 → 文案 y453，
+   三行占 60px，卡片被 1fr 拉到 90px，底部空 21px。
+   改成「标题+胶囊」一行、文案紧跟一行，内容降到 ~39px。
+
+   文案原先 margin-left:41，起点 x=83；01—04 的正文是满宽起排 x=43，
+   差一格就是这次要修的对不齐 —— 左边距归零即可。
+
+   胶囊：10.5px/4+8 内距收到 10px/2+6，单个高 21→17，三个省 12px，
+   360 屏「区域展示区 + 三胶囊」也放得下（含 41 序号缩进共约 264 < 279）。
+   ================================================================== */
+#view-event .ev-blocks.five div:last-child{align-items:center}
+
+#view-event .ev-blocks.five div:last-child b{flex:0 0 auto;padding-left:41px}
+
+/* 胶囊：字号 10、内距 2+6、行高锁 1（基础样式就是 1，别再撑高），
+   单个从 21px 收到 16px；三个胶囊加标题在 360 屏也排得下一行 */
+#view-event .ev-blocks.five div:last-child em{font-size:10px;padding:2px 6px;line-height:1}
+
+/* 标题已占掉左侧 41，第一个胶囊不再重复缩进 */
+#view-event .ev-blocks.five div:last-child em:first-of-type{margin-left:0}
+
+/* 文案满宽起排，与 01—04 正文同一条左边界。
+   v124：margin 也交回 .five span（4px），三档 media 会跟着一起收 */
+#view-event .ev-blocks.five div:last-child span{flex:0 0 100%}
+
+/* v124：三行等高。原来是 1fr 1fr auto，05 行按内容收成 59px，
+   其他四张 99px —— 五块高度不一致就是这么来的 */
+#view-event.active .ev-blocks.five{grid-template-rows:repeat(3,minmax(0,1fr))}
+
+/* v124：左内距 11px 这条已删 —— 它与 .five div 的三档 media 打架，
+   小屏上会把 05 撑得比 01—04 宽一格 */
+
+/* ==================================================================
+   v115 · 矮屏收紧：Safari 带地址栏约 720 可视高，微信内更矮
+   390×720 实测整页 755px，溢出 35px；375×667 溢出 103px。
+   这里不动 844 以上的观感——上限仍是原来的值，只有矮屏往下压。
+   ================================================================== */
+@media (max-height: 780px) {
+  /* 数字条：上下内距 12→7，字号 22.6→21，整块省约 17 */
+  #view-event .ev-nums{padding:7px 0;margin-bottom:8px}
+  #view-event .ev-nums b{font-size:21px}
+  #view-event .ev-nums b em{font-size:13px}
+  #view-event .ev-nums small{margin-top:2px}
+
+  /* 面板：内距 12→9/10、块间距 12→8，两个面板共省约 14 */
+  #view-event .ev-panel{padding:9px 14px 10px;margin-bottom:8px}
+  #view-event .ev-panel-t{margin:0 0 7px}
+
+  /* 五板块卡片：上下 9/10→7/8，三行共省 12；正文行高 1.5→1.42 */
+  #view-event .ev-blocks.five div{padding:7px 11px 8px}
+  #view-event .ev-blocks.five b{font-size:12.5px;line-height:1.35}
+  #view-event .ev-blocks.five span{font-size:11px;line-height:1.42;margin-top:3px}
+
+  /* 时间地点：行内距 11→8，时间轴上下收紧，约省 11 */
+  #view-event .ev-when{padding:2px 14px 10px}
+  #view-event .ev-row{padding:8px 0}
+  #view-event .ev-tl{margin:2px 0 0;padding:7px 0 0}
+  #view-event .ev-tl::before{top:16px}
+
+  /* 吸底栏：按钮上下留白收一点，给内容让 4px。
+     注意别再顺手改 #view-event 的 padding-bottom —— 这里的按钮只矮了 6px，
+     预留却跟着砍 12px，720/760 屏时间卡就被按钮压住 6px（v124 已复现并修回） */
+  #view-event .actions{padding:7px 16px calc(7px + env(safe-area-inset-bottom))}
+}
+
+/* 667 级小屏：再压一档字号，01—04 现在是两行正文，卡高是主要成本 */
+@media (max-height: 700px) {
+  #view-event .ev-nums{padding:5px 0;margin-bottom:6px}
+  #view-event .ev-nums b{font-size:19px}
+  #view-event .ev-panel{padding:7px 12px 8px;margin-bottom:6px}
+  #view-event .ev-blocks.five div{padding:6px 10px 7px}
+  #view-event .ev-blocks.five span{font-size:10.5px;line-height:1.38}
+  #view-event .ev-blocks.five b{font-size:12px}
+  #view-event .ev-row{padding:6px 0}
+  #view-event .ev-main .ev-v{font-size:12.5px}
+  #view-event .ev-tl-i span{font-size:10px}
+}
+
+/* ==================================================================
+   v121 · 报名成功页改版
+   ① 头部由居中竖排改左右结构：图标在左，标题/日期/名次在右
+   ② 凭证 + 信息修改整块上移
+   ③ 领卡引导放大占位，先把视觉权重立起来，设计细节后补
+   ================================================================== */
+
+/* ① 左右结构：原先是「图标居中 → 标题居中 → 日期居中 → 名次居中」四段竖排，
+   光头部就吃掉约 150px。改左右后同一行放完，省下的高度给凭证和领卡。
+   v122：整块在卡片内水平居中（图标 + 文字当一个整体），文字内部仍左对齐，
+   这样标题、日期、名次的左边界还是同一条线，读起来不散。 */
+#view-success .su-head{display:flex;align-items:center;justify-content:center;gap:13px;
+  margin:0 0 10px;text-align:center}
+
+#view-success .su-head .ck-badge{flex:0 0 auto;width:48px;height:48px;margin:0}
+
+/* flex:0 1 auto —— 宽度按内容收缩，整块才能被 justify-content 居中；
+   原来 flex:1 会把文字块拉满剩余宽度，等于左贴 */
+#view-success .su-head-txt{flex:0 1 auto;min-width:0}
+
+/* v126：三行字改为居中。图标放大到 48 之后，左边一个圆、右边一列左对齐的字，
+   重心会明显偏左；文字在自家块内居中，图标+文字作为一个整体再居中，
+   两处都居中之后重心才回得来。 */
+#view-success .su-head .ck-title{font-size:23px;line-height:1.18;letter-spacing:.4px;
+  margin:0;text-align:center}
+
+#view-success .su-head .ck-sub{margin:4px 0 0;font-size:12.5px;line-height:1.3;
+  letter-spacing:.5px;text-align:center}
+
+/* 名次胶囊本来就是 width:fit-content，居中靠 margin:auto，不靠 text-align */
+#view-success .su-head .su-rank{margin:6px auto 0;padding:3px 11px;line-height:1.35}
+
+/* ② 凭证整块上移：头部降高之后，再把凭证上下间距各收一档 */
+#view-success .cred-block{padding:9px 12px;margin:0 0 8px}
+
+/* v123 · 参会凭证并成一行
+   「参会凭证」小字做标签、凭证码做主体、姓名用灰色跟在后面，
+   靠字重与颜色分主次，不靠分行。竖排三行原本吃掉约 40px。 */
+#view-success .cred-head{display:flex;align-items:baseline;justify-content:center;
+  flex-wrap:wrap;gap:0 8px}
+
+/* 标签不再拉字距：原来 2px 是为了竖排时撑开一行，
+   现在和凭证码并排，再拉开就显得跟码不是一体了 */
+#view-success .cred-head .cred-label{font-size:11.5px;letter-spacing:.5px;margin:0;
+  color:var(--muted)}
+
+#view-success .cred-head .credential-code{font-size:24px;letter-spacing:2px;line-height:1.15}
+
+/* 姓名单独一行：持证人身份，跟凭证码挤在一起就分不清哪个是凭证了。
+   字号比码小一档、颜色退到辅助灰，不抢码的分量。 */
+#view-success .cred-block .credential-name{font-size:12.5px;color:var(--muted);
+  margin:2px 0 0;text-align:center}
+
+/* 没有姓名时整行撤掉，别在码下面留一条空白 */
+#view-success .cred-block .credential-name:empty{display:none}
+
+#view-success .cred-ops{margin:0 0 6px}
+
+/* v123：凭证块压缩后把这截让给它。原来上下几乎贴死，
+   可「信息填错了」是要人主动找的入口，夹在凭证和领卡标题之间等于藏起来 */
+#view-success .cred-edit{margin:9px 0 13px}
+
+/* ③ 领卡引导放大：区块标题加重、主推卡 72→96 高、按钮与字号同比例放大。
+   这一步只立版面与权重，配色和细节等设计稿回来再收。 */
+#view-success .ck-gifts-t{font-size:14px;font-weight:600;color:#3f5c68;
+  letter-spacing:.3px;margin:0 0 9px}
+
+#view-success .ck-gifts .cta-card:first-of-type{min-height:96px;padding:17px 15px;
+  border-radius:16px}
+
+#view-success .ck-gifts .cta-card:first-of-type .cta-body b{font-size:17.5px;margin-bottom:4px}
+
+#view-success .ck-gifts .cta-card:first-of-type .cta-body small{font-size:12.5px;line-height:1.5}
+
+/* 按钮加 nowrap：底色是青蓝渐变（base.css 1825 的 ck-gifts-t + .cta-card），
+   .cta-go 原来没锁不换行，「去领卡」三个字在 72px 宽里折成两行、按钮撑到 35px 高。
+   阴影也不该是珊瑚色——那是浅珊瑚版首卡（v100 已废）的配色。 */
+#view-success .ck-gifts .cta-card:first-of-type .cta-go{padding:9px 18px;font-size:14px;
+  border-radius:19px;white-space:nowrap;box-shadow:0 4px 12px rgba(9,38,72,.18)}
+
+#view-success .ck-gifts .cta-card:first-of-type::after{border-radius:16px}
+
+/* 矮屏收紧。三档按真实溢出量定，别凭感觉：
+   844 基准 0 溢出；720 微信 iOS 带导航栏是主战场，原来没有规则管到（实测溢出 14）；
+   700 落进 780 档；667（SE/8）实测溢出 39，靠页脚让位收平。
+   v121 报过「两档全部归零」是错的——那次 CTA 没渲染，等于在空页面上量的高度。 */
+@media (max-height: 780px) {
+  #view-success .su-head{margin:0 0 7px}
+  #view-success .cred-block{padding:8px 12px;margin:0 0 6px}
+  #view-success .cred-ops{margin:0 0 3px}
+  #view-success .cred-edit{margin:5px 0 8px}
+  #view-success .ck-gifts-t{margin:0 0 6px;font-size:13.5px}
+  #view-success .ck-gifts .cta-card:first-of-type{min-height:90px;padding:15px 14px}
+  #view-success .ck-gifts .cta-card{padding:6px 12px 6px 10px;margin:0 0 3px}
+}
+
+/* 667（SE/8）：再往下压一档。压的是内距和卡片高度，字号和二维码展示尺寸不动——
+   这两样直接影响可读性和现场扫码，是最后才该牺牲的。 */
+@media (max-height: 680px) {
+  #view-success .ck-card.ck-success{padding:14px 12px 8px}
+  #view-success .su-head{margin:0 0 3px}
+  #view-success .cred-block{padding:6px 12px;margin:0 0 3px}
+  #view-success .cred-block .cred-qr{margin:4px 0 0}
+  #view-success .cred-ops{margin:0 0 2px}
+  #view-success .cred-edit{margin:4px 0 6px}
+  #view-success .ck-gifts-t{margin:0 0 3px}
+  #view-success .ck-gifts .cta-card:first-of-type{min-height:76px;padding:12px}
+  #view-success .ck-gifts .cta-card{padding:5px 12px 5px 10px;margin:0 0 2px}
+}
+
+/* 640 及以下（SE 一代 / 小屏安卓 360×640）：680 那档还不够，溢出 12px。
+   这一档只再动内距和分隔线，二维码已经压到 78px 下限、字号也不再降。 */
+@media (max-height: 660px) {
+  #view-success .ck-card.ck-success{padding:10px 12px 6px}
+  #view-success .su-head{margin:0 0 1px}
+  #view-success .cred-ops .btn-ghost{padding:6px 8px}
+  #view-success .cred-edit{margin:3px 0 5px}
+  #view-success .ck-gifts-t{margin:0 0 2px}
+  #view-success .ck-gifts .cta-card{padding:5px 11px 5px 9px;margin:0 0 1px}
+  #view-success .ck-gifts .cta-card:first-of-type{min-height:70px;padding:10px}
+}
+
+
+/* ==================================================================
+   v124 · 活动介绍页：五块等高、05 与 01—04 同一套度量、整页按视口铺满
+
+   ① 05 原先长着一套自己的度量（正文 11.5px 写死、颜色加深到 #5b727a、
+      缩进 41/28 各写过一遍），三档 media 都盖不住它 —— 于是小屏上
+      01—04 的正文缩到 11/10.5，05 还停在 11.5，看着就是两块不同的东西。
+      这些覆盖已在原位摘掉，05 现在沿 .five span 的统一规则链走。
+   ② 五块高度：05 那一行原来是 auto（按内容收成 59px），其他四张 99px。
+      改 1fr 三行均分后五块同高 —— 05 只是宽度通栏 + 有胶囊，尺度一致。
+   ③ 时间轴下的留白：ev-when 和板块面板都是 flex:1，多出来的高度全堆在
+      时间卡底部（844 屏 56px、932 屏 98px），而卡内没有任何东西去接。
+      这里让时间卡按内容定高，余量统一交给板块面板，五块跟着长高。
+   ================================================================== */
+
+/* 余量交给板块面板：面板内三行 1fr 均分，五块等高、整页自然长满 */
+#view-event.active .ev-panel{flex:1 1 auto}
+
+/* 时间卡按内容定高：它装的是「时间/地点/时间轴」，没有可延展的内容，
+   被拉伸只会把白留给自己。
+   注意顺序 —— 时间卡本身也带 ev-panel 类（<div class="ev-panel ev-when">），
+   这条必须写在上面那条之后才能压住它 */
+#view-event.active .ev-when{flex:0 0 auto}
+
+/* 块间距按视口高度走：1.42dvh 在 844 屏约 12px（沿用原值），
+   932 屏 13px、667 屏 9.5px，高屏不再把余量摊成模块之间的洞 */
+#view-event.active .ev-nums,
+#view-event.active .ev-panel{margin-bottom:clamp(8px,1.42dvh,16px)}
+
+/* 时间卡是最后一块，底下直接接吸底按钮，不能再挂下边距 */
+#view-event.active .ev-when{margin-bottom:0}
+
+/* 05 的行内节奏（标题与胶囊同行、文案另起一行）沿用 v114 的 flex 布局，
+   间距仍走 gap:0 4px —— 这里不再另写覆盖，05 只保留「通栏 + 胶囊」这两个差异 */
+
+/* 高屏（≥900）：卡片被拉到 120px 以上，光涨高度不涨字会显空。
+   这里把标题/正文/序号同步提一档 —— 高度与内容一起长大，才是等比缩放，
+   而不是「卡片变胖、字还是那么大」的假铺满。 */
+@media (min-height:900px){
+  #view-event .ev-blocks.five b{font-size:13.5px}
+  #view-event .ev-blocks.five span{font-size:12px}
+  #view-event .ev-blocks.five div>i{font-size:22px;top:calc(50% - 32px)}
+  /* 05 的序号有自己的 top/font-size（特异性更高），必须一起写，否则高屏上
+     只有 01—04 的序号变大，05 还是 20px —— 又回到「和上面不一样」 */
+  #view-event .ev-blocks.five div:last-child>i{font-size:22px;top:calc(50% - 32px)}
+}
+
+/* RD-04 日程/议程：后台配置后由 core.js 渲染，替换静态时间线。
+   议程竖排（条数不限），日程按天分组；主题色沿用 --teal 系列。 */
+#view-event .ev-tl.ev-tl-stack{display:block;padding:6px 0 2px;margin:14px 0 0}
+#view-event .ev-tl.ev-tl-stack::before{content:none}
+#view-event .ev-tl.ev-tl-stack .ev-tl-i{display:flex;gap:10px;align-items:baseline;
+  text-align:left;padding:9px 0;border-bottom:1px dashed #e2eef0}
+#view-event .ev-tl.ev-tl-stack .ev-tl-i:last-child{border-bottom:0}
+#view-event .ev-tl.ev-tl-stack .ev-tl-i b{background:none;color:var(--teal-d);
+  font-size:12.5px;padding:0;min-width:74px;box-shadow:none;flex:0 0 auto}
+#view-event .ev-tl.ev-tl-stack .ev-tl-i:first-child b{background:none;color:var(--teal-d);
+  border-radius:0;box-shadow:none}
+#view-event .ev-tl.ev-tl-stack .ev-tl-i span{flex:1;margin:0;font-size:12.5px;
+  color:#24454e;line-height:1.5}
+#view-event .ev-tl.ev-tl-stack .ev-tl-i em.ev-tl-loc{display:block;flex-basis:100%;
+  font-size:11px;color:var(--teal-d);font-style:normal;margin-top:2px}
+#view-event .ev-tl.ev-tl-stack .ev-tl-i em.ev-tl-loc a{color:inherit;text-decoration:none;
+  border-bottom:1px solid currentColor}
+#view-event .ev-sched{margin:14px 0 0;border-top:1px solid #e7eef4;padding-top:12px}
+#view-event .ev-sched-h{font-size:13px;font-weight:700;color:var(--teal-d);margin-bottom:8px}
+#view-event .ev-sched-i{display:flex;gap:10px;align-items:baseline;padding:7px 0;
+  border-bottom:1px dashed #e2eef0}
+#view-event .ev-sched-i:last-child{border-bottom:0}
+#view-event .ev-sched-i b{flex:0 0 62px;font-size:12px;color:var(--teal-d)}
+#view-event .ev-sched-i span{flex:1;font-size:12.5px;color:#24454e;line-height:1.5}
+
+/* RD-04 嘉宾/讲师（专业版）：头像 + 姓名职务 + 简介，主题色沿用 --teal */
+#view-event .ev-speakers{margin:16px 0 0;border-top:1px solid #e7eef4;padding-top:12px}
+#view-event .ev-spk-i{display:flex;gap:10px;align-items:flex-start;padding:10px 0;
+  border-bottom:1px dashed #e2eef0}
+#view-event .ev-spk-i:last-child{border-bottom:0}
+#view-event .ev-spk-av{width:44px;height:44px;border-radius:50%;object-fit:cover;
+  flex:0 0 44px;background:#eef5f6}
+#view-event .ev-spk-body{flex:1;min-width:0}
+#view-event .ev-spk-body b{display:block;font-size:13.5px;color:#24454e}
+#view-event .ev-spk-body small{display:block;font-size:11.5px;color:var(--teal-d);
+  margin-top:2px}
+#view-event .ev-spk-body span{display:block;font-size:11.5px;color:#5b727a;
+  line-height:1.55;margin-top:5px}
+
+/* RD-04 报名附件：成功页弱入口，选填 */
+#view-success .su-attach{margin:10px 0 0;padding-top:10px;border-top:1px dashed #e2eef0}
+#view-success .su-att-i{display:flex;align-items:center;gap:10px;padding:6px 0;
+  font-size:12px;color:#24454e}
+#view-success .su-att-i a{flex:1;color:var(--teal-d);text-decoration:none;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#view-success .su-att-del{border:0;background:none;color:#b4453a;font-size:11px;
+  padding:2px 6px;cursor:pointer}
+
+/* 活动资料下载（专业版）：报名页/成功页弱入口，不抢主路径 */
+.su-material{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  margin:12px 0 0;padding:10px 12px;border-radius:10px;
+  background:#f4f8fb;border:1px solid #e2ebf2}
+.su-material-label{flex:1;min-width:150px;font-size:13px;color:#24454e}
+.su-material .btn-ghost{font-size:12px;padding:6px 12px;text-decoration:none;
+  display:inline-block;line-height:1.6}
+
+/* 参会凭证找回（RD-21 G7） */
+.su-cred-link{display:block;margin:8px 0 0;border:0;background:none;color:var(--teal);
+  font-size:12px;text-align:center;width:100%;cursor:pointer}
+.cvm-code{font:700 28px ui-monospace,Menlo,Consolas,monospace;letter-spacing:3px;
+  text-align:center;color:#1f2a37;margin:6px 0 12px}
+.cvm-qr{display:flex;justify-content:center}
+.cvm-qr svg{width:180px;height:180px}

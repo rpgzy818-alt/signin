@@ -1,0 +1,22 @@
+    <section class="view" id="view-status" data-route="status">
+      <!-- v127：与签到成功页统一为「卡片外壳 + 左右结构头部 + 领卡区吃余量」 -->
+      <div class="ck-card ck-card-status">
+        <div class="ck-head">
+          <div class="ok-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.6 9.6 17.6 19.6 6.8"/></svg>
+          </div>
+          <div class="ck-head-txt">
+            <h2 class="ck-title" id="status-title">状态查询中</h2>
+            <p class="ok-sub" id="status-sub"></p>
+          </div>
+        </div>
+        <div class="state-box state-info" id="status-detail">正在核对你的报名与签到状态…</div>
+        <!-- 现场节奏：与签到成功页同一条信息，已报名/已签到的来宾用得上 -->
+        <div class="ck-flow" id="status-flow" style="display:none"></div>
+        <div class="actions" id="status-actions"></div>
+      </div>
+      <div class="follow" id="status-follow" style="display:none">
+        <p>活动提醒与变更通知将以短信发送至报名手机号</p>
+      </div>
+      <footer class="foot">活动服务平台 · <a href="#" data-contact>咨询主办方</a></footer>
+    </section>

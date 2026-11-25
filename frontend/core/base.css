@@ -1,0 +1,2547 @@
+/* base.css · 通用底座：变量、reset、全局组件（按钮/卡片/表单/toast/浮层）。改任何页都要先看这里。
+ * 由 main.css 机械切分（第一刀）。规则顺序与原文件一致，未重排、未改写声明。
+ * 归位依据：#view-* 前缀 / 页面私有 id（index.html 视图边界）/ .ad-* 前缀。
+ */
+/* meeting-h5 · 样式基线
+ * 结构：介绍页（整屏）→ 报名页（活动信息＋表单）→ 成功页（＋礼物弹层）→ 权益卡页
+ * 基调：白底、青绿→湖蓝渐变、珊瑚橙提亮；轻、透，不做厚重政务风。
+ */
+:root{
+  --teal:#1ba9a0; --teal-d:#128b85; --blue:#2f6df0; --coral:#ff6b4a; --coral-l:#ff8a6a;
+  --ink:#0f3d43; --body:#1f3a40; --muted:#8a9aa6; --line:#e6ebf0; --bg:#f5f8fb;
+  /* 主题派生色：原先散落在各 CSS 文件里的硬编码，P7 收敛到这里。
+     与 backend/theme.py 的 default 组逐项同值——改值两边一起改，
+     少改一边就会出现「接口下发新主题、首屏兜底还是旧色」的跳变。 */
+  --teal-l:#5db6ca; --teal-2:#0f8d85; --teal-mid:#2f8fd0; --teal-glow:rgba(27,169,160,.16);
+  --blue-l:#4f8ef7; --coral-l2:#ffa47a;
+  --surface-soft:#f8fcfd; --accent-soft:#e4f0f1; --hero-bg:#eaf7f8;
+  /* 设计系统：字号 / 间距 / 圆角 / 缓动（只新增，不动上方颜色变量） */
+  --fs-1:34px; --fs-2:22px; --fs-3:17px; --fs-4:15px; --fs-5:13px; --fs-6:11.5px;
+  --sp-1:8px; --sp-2:16px; --sp-3:24px; --sp-4:32px;
+  --r-lg:16px; --r-sm:10px;
+  --ease:cubic-bezier(.22,1,.36,1);
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+html,body{margin:0;padding:0}
+
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;
+  color:var(--body);background:var(--bg);font-size:15px;line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+
+#app{max-width:480px;margin:0 auto;min-height:100vh;background:#fff;position:relative;
+  box-shadow:0 0 24px rgba(31,42,55,.06);overflow-x:hidden}
+
+/* 顶部品牌条：介绍页隐藏，保持首屏整屏视觉 */
+.brand-bar{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;
+  padding:12px 16px;background:linear-gradient(90deg,var(--teal),var(--blue));color:#fff}
+
+.brand-main{font-weight:600;font-size:var(--fs-5)}
+
+.brand-sub{font-size:var(--fs-5);opacity:.9}
+
+body[data-route="intro"] .brand-bar{display:none}
+
+.view{display:none;padding:var(--sp-3) var(--sp-2) max(var(--sp-4), calc(var(--sp-3) + env(safe-area-inset-bottom)));animation:uRise .28s var(--ease)}
+
+.view.active{display:block}
+
+/* 分层进场：统一 200–320ms / var(--ease)，主卡先入，次级元素延迟 60–120ms */
+@keyframes uRise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.u-rise{animation:uRise .28s var(--ease) backwards}
+
+.u-rise:nth-child(2){animation-delay:.08s}
+
+.u-rise:nth-child(n+3){animation-delay:.12s}
+
+.view-full{padding:0;animation:none}
+
+.view-full.active{display:block}
+
+/* ========== 1. 介绍页（背景图整屏 + 左对齐信息轴 + 上滑进入） ========== */
+.intro-screen{position:relative;display:flex;flex-direction:column;height:100vh;height:100dvh;
+  overflow:hidden;background:var(--hero-bg)}
+
+.intro-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 92%;
+  animation:introPush 2600ms var(--ease) backwards;will-change:transform}
+
+@keyframes introPush{from{transform:scale(1.07)}to{transform:scale(1)}}
+
+/* 上部提亮：保证文字在插画上可读；右下角建筑保持原色 */
+.intro-veil{position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,.95) 0%,rgba(255,255,255,.88) 28%,
+             rgba(255,255,255,.46) 46%,rgba(255,255,255,0) 64%)}
+
+.intro-veil::after{content:"";position:absolute;left:-25%;top:-12%;width:150%;height:66%;
+  background:radial-gradient(ellipse at 28% 42%,rgba(255,255,255,.9),rgba(255,255,255,0) 60%);
+  animation:introGlow 8s ease-in-out infinite}
+
+@keyframes introGlow{0%,100%{opacity:.4}50%{opacity:.72}}
+
+/* 底部托底：上滑提示不压在水面波纹上 */
+.intro-foot-veil{position:absolute;left:0;right:0;bottom:0;height:132px;pointer-events:none;z-index:1;
+  background:linear-gradient(180deg,rgba(255,255,255,0),rgba(255,255,255,.86) 46%,rgba(255,255,255,.96))}
+
+.intro-layer{position:relative;z-index:2;display:flex;flex-direction:column;height:100%;
+  padding:calc(env(safe-area-inset-top) + 3.4vh) 24px calc(env(safe-area-inset-bottom) + 3vh)}
+
+/* 英文主标：左右出血，只做氛围不承载信息 */
+.intro-en{font-family:Georgia,"Times New Roman",serif;font-weight:600;color:#8fd3d1;opacity:.58;
+  font-size:min(15.2vw,62px);letter-spacing:.075em;line-height:1;white-space:nowrap;
+  width:108%;margin-left:-4%;text-align:center;
+  animation:introEnIn 1000ms var(--ease) backwards}
+
+@keyframes introEnIn{from{opacity:0;transform:translateX(-14px);letter-spacing:.2em}
+  to{opacity:.58;transform:translateX(0);letter-spacing:.075em}}
+
+.intro-brand{margin:min(2.2vh,18px) 0 0;font-size:11px;letter-spacing:2.2px;color:#5f9298;
+  display:flex;align-items:center;gap:9px;animation:introUp 420ms 120ms var(--ease) backwards}
+
+.intro-brand::before{content:"";width:18px;height:1px;background:#8fc6c6;transform-origin:left;
+  animation:introGrowX 520ms 220ms var(--ease) backwards}
+
+@keyframes introGrowX{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+.intro-slogan{margin:min(4.4vh,34px) 0 0;font-family:"Songti SC","STSong",Georgia,serif;
+  font-weight:700;font-size:min(11.5vw,48px);line-height:1.3;letter-spacing:.5px;color:var(--ink)}
+
+.intro-slogan .ln{display:block;overflow:hidden}
+
+.intro-slogan .ch{display:inline-block;animation:introChUp 560ms var(--ease) backwards;
+  animation-delay:var(--d,300ms)}
+
+.intro-slogan .ch.b{color:var(--blue)}
+
+@keyframes introChUp{from{transform:translateY(112%);opacity:0}to{transform:translateY(0);opacity:1}}
+
+.intro-welcome{margin:min(4.2vh,32px) 0 0;font-size:12.5px;color:#3d7a80;letter-spacing:.4px;
+  display:flex;align-items:center;gap:7px;animation:introUp 420ms 620ms var(--ease) backwards}
+
+.intro-welcome i{display:block;width:14px;height:1px;background:#8fc6c6}
+
+.intro-desc{margin:min(2.2vh,16px) 0 0;font-size:min(3.35vw,13.2px);line-height:1.95;
+  color:#48656e;letter-spacing:.1px;animation:introUp 520ms 700ms var(--ease) backwards}
+
+.intro-sign{margin:8px 0 0;font-size:min(3.35vw,13.2px);line-height:1.6;font-weight:600;
+  color:var(--teal-d);letter-spacing:1.2px;animation:introUp 520ms 800ms var(--ease) backwards}
+
+@keyframes introUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* 上滑引导：整组向上浮动，箭头与文字同步呼吸 */
+.swipe-hint{position:relative;z-index:2;margin-top:auto;display:flex;flex-direction:column;
+  align-items:flex-start;gap:6px;width:100%;padding:0;border:none;background:transparent;
+  cursor:pointer;font:inherit;animation:introUp 480ms 900ms var(--ease) backwards}
+
+.swipe-arrow{width:9px;height:9px;border-left:1.8px solid var(--teal);border-top:1.8px solid var(--teal);
+  transform:rotate(45deg);animation:upDown 2.6s ease-in-out infinite}
+
+@keyframes upDown{0%,100%{transform:translateY(4px) rotate(45deg);opacity:.35}
+  50%{transform:translateY(-6px) rotate(45deg);opacity:1}}
+
+.swipe-text{font-size:12.5px;color:#146b73;letter-spacing:.4px;
+  animation:swipeBreath 2.6s ease-in-out infinite}
+
+/* 呼吸动画的最低透明度不能压太低：这个提示压在浅青水面背景上，
+   原来 0.7 时与背景对比度掉到 3 以下，实际是「看不清而不是不够显眼」 */
+@keyframes swipeBreath{0%,100%{opacity:.85}50%{opacity:1}}
+
+.swipe-dots{display:flex;align-items:center;gap:5px;margin-top:2px}
+
+.swipe-dots i{width:5px;height:5px;border-radius:50%;background:rgba(27,169,160,.26)}
+
+.swipe-dots i.on{width:14px;border-radius:3px;background:var(--teal)}
+
+/* ========== 2. 报名页 ========== */
+.signup-head{padding:2px 0 12px}
+
+.big-date{font-family:"Songti SC",Georgia,serif;font-size:var(--fs-2);letter-spacing:2.5px;
+  color:var(--teal);font-weight:700}
+
+.signup-head h2{font-size:var(--fs-2);line-height:1.36;letter-spacing:.4px;margin:7px 0 6px;color:var(--ink)}
+
+.signup-sub{font-size:var(--fs-5);color:var(--muted);margin:0;letter-spacing:.6px}
+
+.event-card{background:linear-gradient(160deg,#f2fbfb,#eef6ff);border:1px solid #e2f0f1;
+  border-radius:var(--r-lg);padding:var(--sp-2);margin:0 0 var(--sp-3)}
+
+.ev-row{display:flex;align-items:flex-start;gap:10px;padding:6px 0}
+
+.ev-ic{flex:0 0 18px;color:var(--teal);margin-top:2px}
+
+.ev-ic svg{width:18px;height:18px;display:block}
+
+.ev-main{flex:1;min-width:0}
+
+.ev-k{font-size:11.5px;color:#7c9ba0;letter-spacing:.8px}
+
+.ev-v{font-size:var(--fs-5);color:var(--body);line-height:1.55}
+
+.ev-v2{color:#5a7a80;font-size:var(--fs-5)}
+
+.ev-act{flex:0 0 auto;border:1px solid var(--teal);color:var(--teal-d);background:#fff;
+  border-radius:14px;padding:4px 11px;font-size:var(--fs-5);cursor:pointer;white-space:nowrap;margin-top:2px}
+
+.ev-act:active{background:#e8f8f7}
+
+/* 地点行的操作按钮竖排：导航在上、复制地址在下 */
+.ev-acts{flex:0 0 auto;display:flex;flex-direction:column;gap:6px;align-items:stretch;margin-top:2px}
+
+.ev-acts .ev-act{margin-top:0}
+
+.ev-act-sm{font-size:var(--fs-5);padding:3px 10px;color:#5c8f95;border-color:#cfe3e5}
+
+.numbers{display:flex;justify-content:space-between;margin-top:12px;padding-top:12px;
+  border-top:1px dashed #d6e9ea}
+
+.numbers span{flex:1;text-align:center}
+
+.numbers b{color:var(--coral);font-size:var(--fs-2);font-weight:800;letter-spacing:-.2px}
+
+.numbers em{color:var(--coral);font-size:var(--fs-6);font-style:normal;margin-left:1px}
+
+.numbers small{display:block;font-size:var(--fs-6);color:#7c9ba0;margin-top:1px}
+
+.form{display:flex;flex-direction:column;gap:12px}
+
+.form label{display:flex;flex-direction:column;font-size:13px;color:#33414f;gap:6px}
+
+.form input,.form select{border:1px solid var(--line);border-radius:var(--r-sm);padding:11px 12px;font-size:15px;
+  outline:none;background:#fff;color:var(--body)}
+
+.form input:focus,.form select:focus{border-color:var(--blue)}
+
+/* 隐私勾选：必须覆盖 .form label 的竖排，否则复选框与文字错行 */
+.form .privacy{flex-direction:row;align-items:center;gap:8px;font-size:13px;line-height:1.6}
+
+.privacy input{width:auto;flex:0 0 auto;margin:0}
+
+.privacy a{color:var(--blue);text-decoration:none}
+
+.form-msg{font-size:13px;min-height:16px;color:var(--coral);margin:0}
+
+.signup-note{font-size:11.5px;color:#9aa8b4;text-align:center;margin:2px 0 0}
+
+/* ========== 3. 报名成功页 ========== */
+.ok-badge{width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--blue));
+  color:#fff;display:flex;align-items:center;justify-content:center;margin:14px auto 12px;
+  box-shadow:0 8px 20px rgba(27,169,160,.25)}
+
+.ok-badge svg{width:30px;height:30px}
+
+.ok-sub{text-align:center;font-size:var(--fs-5);color:var(--teal);margin:0 0 8px}
+
+.ok-note{text-align:center;font-size:var(--fs-5);color:var(--muted);line-height:1.7;margin:0 0 16px}
+
+.credential{text-align:center;background:#f7fbfd;border:1px dashed #cfe3ea;border-radius:var(--r-lg);
+  padding:var(--sp-2);margin:0 0 var(--sp-2)}
+
+.cred-label{font-size:11.5px;color:var(--muted);letter-spacing:2.5px;margin-bottom:6px}
+
+.credential-code{font-size:var(--fs-2);font-weight:800;letter-spacing:4px;color:var(--blue);
+  font-family:"SF Mono",Menlo,monospace}
+
+.credential-name{color:var(--muted);font-size:13px;margin:4px 0 12px}
+
+.follow{text-align:center;margin-top:18px;color:var(--muted);font-size:13px}
+
+.follow p{margin:0 0 8px}
+
+.qr{width:140px;height:140px;object-fit:contain;margin-top:4px;background:#f0f2f5;border-radius:10px}
+
+/* ========== 通用按钮 / 段落 ========== */
+.actions{display:flex;flex-direction:column;gap:var(--sp-1);margin:var(--sp-3) 0}
+
+.btn-primary{background:linear-gradient(90deg,var(--teal),var(--blue));color:#fff;border:none;
+  border-radius:28px;padding:13px 20px;font-size:var(--fs-3);font-weight:600;cursor:pointer;font-family:inherit}
+
+.btn-primary:active{opacity:.92}
+
+.btn-primary.block{width:100%}
+
+.btn-ghost{background:#fff;color:var(--blue);border:1px solid var(--blue);border-radius:28px;
+  padding:12px 20px;font-size:15px;cursor:pointer;font-family:inherit}
+
+.btn-ghost.block{width:100%}
+
+.foot{margin-top:24px;color:var(--muted);font-size:var(--fs-5);text-align:center;line-height:1.8}
+/* 底部标识（原广告位）：只有体验版渲染。做成一枚极淡的胶囊而不是整条通栏，
+   它要能被看见，但不能把「报名成功」这句主信息的视线拉走。 */
+.tech-badge{
+  margin-top:16px;padding-top:12px;border-top:1px solid rgba(0,0,0,.05);
+  display:flex;align-items:center;justify-content:center;flex-wrap:wrap;
+  gap:0 8px;font-size:11px;color:var(--muted);line-height:1.7;opacity:.85;
+}
+.tech-badge a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.tb-sep{width:1px;height:10px;background:currentColor;opacity:.35;display:inline-block}
+@media (prefers-color-scheme:dark){
+  .tech-badge{border-top-color:rgba(255,255,255,.07)}
+}
+/* 签到成功卡是 flex 列且撑满剩余高度：标识靠 margin-top:auto 落到卡底，
+   否则它会紧贴时间轴、下面留一大片空白，看着像内容没加载完。 */
+#checkin-state > .ck-card-done > .tech-badge{margin-top:auto;flex:0 0 auto}
+
+.muted{color:var(--muted)}
+
+/* ========== 5. 签到 / 补录 / 核销 / 后台 ========== */
+/* #view-checkin 已无 h2；walkin / verify / admin 的 h2 仍在 HTML 中，保留 */
+#view-walkin h2,#view-verify h2,#view-admin h2{text-align:center;margin:6px 0 4px}
+
+.state-box{border-radius:14px;padding:18px;margin-bottom:12px;line-height:1.75}
+
+.state-ok{background:#eafaf4;color:var(--teal-d)}
+
+.state-warn{background:#fff5f0;color:var(--coral)}
+
+.state-info{background:#f3f8ff;color:var(--blue)}
+
+.verify-result{margin-top:12px}
+
+.ck-card{background:#fff;border:1px solid #e6f2f3;border-radius:16px;padding:20px 14px 14px;
+  text-align:center;box-shadow:0 8px 22px rgba(27,140,160,.07);
+  animation:uRise .28s var(--ease)}
+
+.ck-card.ck-pad{padding:22px 16px 18px}
+
+.ck-card.ck-card-warn{background:#fff8f5;border-color:#ffddd2}
+
+/* 未报名：需要用户多做一步，给一点暖色提示，但不做成报错 */
+.ck-card.ck-card-notice{background:#fffdfb;border-color:#ffe8d9}
+
+.ck-badge{width:46px;height:46px;border-radius:50%;margin:0 auto 9px;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--teal),var(--blue));
+  box-shadow:0 6px 16px rgba(27,169,160,.22)}
+
+.ck-badge svg{width:22px;height:22px}
+
+.ck-sub{font-size:13px;color:var(--teal-d);margin:0 0 2px;letter-spacing:.4px}
+
+.ck-stamp{font-size:var(--fs-5);color:var(--muted);margin:0 0 10px}
+
+.ck-flow{display:flex;border-top:1px dashed #e6ebf0;border-bottom:1px dashed #e6ebf0;
+  padding:9px 0;margin:0 0 10px}
+
+.ck-f{flex:1;text-align:center;position:relative}
+
+.ck-f+.ck-f::before{content:"";position:absolute;left:0;top:3px;bottom:3px;width:1px;background:#eef3f5}
+
+.ck-f b{display:block;font-size:var(--fs-5);color:var(--ink);letter-spacing:.2px}
+
+.ck-f span{display:block;font-size:var(--fs-6);color:var(--muted);margin-top:2px}
+
+/* 三份领取：紧凑三行直接嵌在结果卡里，不再跳一层领取页 */
+.ck-gifts{text-align:left}
+
+.ck-gifts-t{margin:0 0 10px;font-size:13px;color:#5b7180;margin:0 0 8px;letter-spacing:.4px}
+
+.ck-gifts .cta-card{padding:9px 14px 9px 11px;border-radius:11px;gap:9px;margin:0 0 6px;
+  border-color:#eef3f5;background:#fbfdfd}
+
+.ck-gifts .cta-card:last-child{margin-bottom:0}
+
+.ck-gifts .cta-body b{font-size:var(--fs-5);margin-bottom:1px}
+
+.ck-gifts .cta-body small{font-size:var(--fs-6);line-height:1.4}
+
+/* 尺寸贴近微信开放标签内的按钮，真机挂标签前后视觉不跳 */
+.ck-gifts .cta-go{font-size:var(--fs-5);padding:5px 13px;border-radius:16px}
+
+.ck-gifts .cta-card[data-cta-key="card"]{background:#fffaf7;border-color:#ffe3d6}
+
+.ck-gifts .cta-card[data-cta-key="card"] .cta-body b{color:#7a3a26}
+
+.ck-gifts .cta-card[data-cta-key="card"] .cta-go{background:var(--coral)}
+
+.ck-lead{font-size:var(--fs-5);color:var(--body);line-height:1.65;margin:0 0 14px}
+
+.ck-hint{font-size:11.5px;color:var(--muted);line-height:1.6;margin:12px 0 0;
+  padding-top:11px;border-top:1px dashed #e6ebf0}
+
+.ck-skel{text-align:center;color:var(--muted);font-size:13px;padding:40px 0}
+
+/* 减少动态效果：全站统一降级为淡入（无位移），不再只覆盖 .ck-card */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .view,.view.active,.ck-card,.vf-card,.u-rise{animation:fadeIn .2s ease both!important}
+}
+
+.cred-block{background:#f7fbfd;border:1px dashed #cfe3ea;border-radius:12px;
+  padding:12px 14px 14px;margin:0 0 10px}
+
+.cred-block .cred-label{font-size:var(--fs-6);letter-spacing:2px;margin-bottom:4px}
+
+.cred-block .credential-code{font-size:var(--fs-2);letter-spacing:3px;line-height:1.25}
+
+.cred-block .credential-name{font-size:var(--fs-5);margin:3px 0 0}
+
+.cred-block .cred-qr{margin:10px 0 0}
+
+.cred-block .cred-qr svg{width:104px;height:104px;margin-bottom:4px}
+
+.cred-block .cred-qr-tip{font-size:var(--fs-6)}
+
+.cred-ops{display:flex;gap:8px;margin:0 0 12px}
+
+.cred-ops .btn-ghost{flex:1;padding:9px 8px;font-size:13px;border-radius:10px}
+
+.stats{display:flex;gap:10px;margin:12px 0}
+
+.stat{flex:1;background:#f3f8ff;border-radius:12px;padding:12px;text-align:center}
+
+.stat b{font-size:22px;color:var(--blue);display:block}
+
+/* ========== 弹层 ========== */
+.modal{position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center}
+
+.modal-mask{position:absolute;inset:0;background:rgba(15,23,34,.55)}
+
+.modal-box{position:relative;z-index:1;width:88%;max-width:440px;max-height:80vh;overflow:auto;
+  background:#fff;border-radius:16px;padding:20px 18px;box-shadow:0 12px 40px rgba(15,23,34,.25)}
+
+.modal-box h3{margin:0 0 12px;color:var(--blue);font-size:var(--fs-3);text-align:center}
+
+.modal-body p{font-size:var(--fs-5);line-height:1.7;color:#33414f;margin:0 0 10px}
+
+.modal-body b{color:#1f2a37}
+
+/* 弹层里的「弱提示」按钮：与主按钮并列的第二选择（如协议弹层的「不同意，返回」）。
+   不能做成 <a> 或纯文字——纯文字在小屏上点击区太窄，误触主按钮的代价更大；
+   也不能沿用 .btn-* —— 它会跟主按钮抢视觉权重，把「同意」这个默认路径冲淡。
+   折中：文字退到 12px/muted，但整行是块级按钮、点击区 34px 高。 */
+.modal-weak{display:block;width:100%;margin:4px 0 0;padding:8px 0;
+  background:none;border:0;border-radius:8px;
+  font-family:inherit;font-size:12px;line-height:1.5;color:var(--muted);
+  text-align:center;cursor:pointer;
+  -webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent}
+
+.modal-weak:active{color:#5b7180;background:#f2f6f9}
+
+/* 更多地图选择 */
+.map-list{display:flex;flex-direction:column;gap:8px;margin:6px 0 14px}
+
+.map-list a{display:block;padding:11px 14px;border:1px solid var(--line);border-radius:10px;
+  color:var(--blue);text-decoration:none;font-size:var(--fs-5);text-align:center;background:#f7fbff}
+
+/* ========== 意向岗位方向 chips ========== */
+.chip-group{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+
+.chip{position:relative;display:inline-flex;align-items:center;padding:7px 12px;border:1px solid var(--line);
+  border-radius:20px;font-size:13px;color:#4a5a6a;background:#fff;cursor:pointer;user-select:none}
+
+.chip input{position:absolute;opacity:0;pointer-events:none}
+
+.chip.on{border-color:var(--blue);background:#eaf3ff;color:var(--blue);font-weight:600}
+
+.chip-hint{font-size:var(--fs-5);color:#8a97a5;margin-top:6px}
+
+.form-label{font-size:var(--fs-5);font-weight:600;color:var(--ink)}
+
+.form .chip{display:inline-flex;align-items:center;gap:0;margin:0;padding:7px 12px;
+  border:1px solid var(--line);border-radius:20px;font-size:13px;font-weight:400;
+  color:#4a5a6a;background:#fff;cursor:pointer;line-height:1.4}
+
+.form .chip.on{border-color:var(--blue);background:#eaf3ff;color:var(--blue);font-weight:600}
+
+.chip-hint a{color:var(--blue);text-decoration:none}
+
+/* 方向说明：真两列栅格（左窄右宽），右侧长文本在自己列内换行，不再绕回左栏 */
+/* v121：左列 auto → max-content。auto 在窄屏会被压到小于内容宽（375 上实测只剩
+   90 出头），「人力／行政／法务」于是顶出或换行；max-content 保底按最长分类名撑开。
+   列间距 12→8、行距 10→7、正文行高 1.55→1.45，整块矮约 45px，弹窗不再顶满 80vh。 */
+.help-list{display:grid;grid-template-columns:max-content 1fr;column-gap:8px;row-gap:7px;
+  align-items:start}
+
+.help-list b{font-size:var(--fs-5);color:#12545c;font-weight:600;line-height:1.5;
+  white-space:nowrap}
+
+.help-list span{font-size:var(--fs-5);color:#5b7180;line-height:1.45}
+
+/* v121：方向说明弹窗比通用弹窗宽一点，给右侧描述多留水平空间，少折一行 */
+#intent-help-modal .modal-box{width:92%}
+
+.help-tip{font-size:var(--fs-5);color:var(--muted);text-align:center;margin:14px 0 12px}
+
+/* ========== toast ========== */
+.toast{position:fixed;left:50%;bottom:40px;transform:translateX(-50%);background:rgba(15,26,32,.92);
+  color:#fff;padding:10px 18px;border-radius:24px;font-size:var(--fs-5);opacity:0;pointer-events:none;
+  transition:opacity .2s;z-index:99;max-width:82%;text-align:center;line-height:1.5}
+
+.toast.show{opacity:1}
+
+/* ========== 小屏适配 ========== */
+@media (max-height:700px){
+  .intro-layer{padding-top:calc(env(safe-area-inset-top) + 1.8vh);
+    padding-bottom:calc(env(safe-area-inset-bottom) + 2vh)}
+  .intro-veil{background:linear-gradient(180deg,rgba(255,255,255,.97) 0%,rgba(255,255,255,.94) 32%,
+    rgba(255,255,255,.72) 50%,rgba(255,255,255,.22) 62%,rgba(255,255,255,0) 72%)}
+  .intro-en{font-size:13.2vw}
+  .intro-brand{margin:1.4vh 0 0;font-size:10.5px}
+  .intro-slogan{margin:1.2vh 0 0;font-size:9.9vw}
+  .intro-welcome{margin:1.6vh 0 0;font-size:12px}
+  .intro-desc{margin:.9vh 0 0;font-size:min(3.1vw,11.8px);line-height:1.68;
+    text-shadow:0 0 10px rgba(255,255,255,.95)}
+  .intro-sign{margin:5px 0 0;font-size:11.8px}
+  .intro-foot-veil{height:104px}
+  .swipe-text{font-size:11.5px}
+}
+
+@media (max-width:340px){
+  .intro-slogan{font-size:9.4vw;letter-spacing:.5px}
+  .signup-head h2{font-size:var(--fs-2)}
+}
+
+/* ==================================================================
+   管理后台：独立 PC 端界面（与用户端 H5 完全区隔）
+   ================================================================== */
+body[data-route="admin"]{background:#eef2f6}
+
+body[data-route="admin"] #app{max-width:none;box-shadow:none;background:#eef2f6;
+  height:100vh;overflow:hidden}
+
+body[data-route="admin"] .brand-bar{display:none}
+
+.view-admin{padding:0;min-height:100vh}
+
+/* 打印/另存 PDF 时同样带水印：fixed 元素会在每页重复 */
+@media print{
+  .ad-watermark{display:block !important;position:fixed;inset:0;z-index:9999}
+}
+
+/* 统计卡 */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:0}
+
+.stat{background:#f6f9fb;border:1px solid #e8eef3;border-radius:10px;padding:16px;text-align:center}
+
+.stat b{font-size:34px;color:var(--teal);display:block;line-height:1.2}
+
+.stat span{font-size:var(--fs-5);color:var(--muted)}
+
+.sum-row{background:#f6f9fb;border:1px solid #e8eef3;border-radius:10px;padding:14px 16px}
+
+.sum-row span{display:block;font-size:11.5px;color:var(--muted);margin-bottom:6px}
+
+.sum-row b{font-size:var(--fs-5);color:var(--ink);font-weight:600;word-break:break-all}
+
+/* 闸门面板 */
+.gate-panel{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  background:#f6f9fb;border:1px solid #e8eef3;border-radius:10px;padding:16px 18px}
+
+.gp-state{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+
+.gp-state b{font-size:var(--fs-5);padding:4px 12px;border-radius:12px}
+
+.gp-state b.on{background:#e6f7f3;color:var(--teal-d)}
+
+.gp-state b.off{background:#fff1ec;color:var(--coral)}
+
+.gp-ops{display:flex;gap:10px}
+
+.gp-ops .btn-ghost{padding:8px 18px;font-size:var(--fs-5);border-radius:8px}
+
+.td-name{font-weight:600;color:var(--ink);white-space:nowrap}
+
+.td-mono{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:var(--fs-5);color:#6a7f8a;white-space:nowrap}
+
+.td-sub{font-size:var(--fs-6);color:#9aa8b4;margin-top:3px}
+
+.td-ok{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:11px;background:#e6f7f3;color:var(--teal-d)}
+
+.td-no{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:11px;background:#f2f4f6;color:#8a97a2}
+
+.td-warn{display:inline-block;font-size:11.5px;padding:2px 9px;border-radius:11px;background:#fff4e6;color:#c98a2e}
+
+.td-empty{text-align:center;color:var(--muted);padding:28px 0;font-size:13px}
+
+/* 开卡转化 */
+.card-stats{display:grid;grid-template-columns:repeat(3,1fr) 2fr;gap:14px;margin:0 0 16px}
+
+.cs-card{background:#f6f9fb;border:1px solid #e8eef3;border-radius:10px;padding:16px;text-align:center}
+
+.cs-card.wide{text-align:left}
+
+.cs-card b{font-size:var(--fs-2);color:var(--teal);display:block;line-height:1.25;word-break:break-all}
+
+.cs-card.wide b{font-size:15px}
+
+.cs-card span{font-size:11.5px;color:var(--muted)}
+
+.cs-note{grid-column:1/-1;font-size:11.5px;color:var(--muted);line-height:1.7;margin:0}
+
+.cs-note code{background:#f1f5f7;padding:1px 5px;border-radius:4px;font-size:var(--fs-6)}
+
+.pg-size{border:1px solid #d9e3ea;border-radius:6px;background:#fff;color:#31454f;
+  font-size:var(--fs-5);padding:5px 8px;cursor:pointer}
+
+.pg-btn{border:1px solid #d9e3ea;border-radius:6px;background:#fff;color:#31454f;
+  font-size:var(--fs-5);padding:5px 12px;cursor:pointer}
+
+.pg-btn:hover:not(:disabled){border-color:var(--teal);color:var(--teal-d)}
+
+.pg-btn:disabled{opacity:.45;cursor:not-allowed}
+
+.pg-cur{min-width:52px;text-align:center;color:#6a7f8a}
+
+/* 账号管理 */
+.acct-form{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:12px 14px;align-items:end}
+
+.acct-form label{display:flex;flex-direction:column;gap:6px;font-size:var(--fs-5);color:#33414f}
+
+.acct-form input[type=text],.acct-form input[type=password],.acct-form select{
+  border:1px solid #d9e3ea;border-radius:8px;padding:9px 11px;font-size:var(--fs-5);outline:none;
+  background:#fff;color:#31454f;font-family:inherit}
+
+.acct-form input:focus,.acct-form select:focus{border-color:var(--teal)}
+
+.acct-form .acct-chk{flex-direction:row;align-items:center;gap:8px;padding-bottom:9px;font-size:13px}
+
+.acct-form button{grid-column:1/-1;justify-self:start;padding:9px 22px}
+
+.acct-form .form-msg{grid-column:1/-1;margin:0}
+
+.acct-table{min-width:760px}
+
+.acct-table input[type=checkbox]{width:15px;height:15px;accent-color:var(--teal);cursor:pointer}
+
+.acct-ops{display:flex;gap:6px;flex-wrap:wrap}
+
+.acct-btn{padding:5px 10px;font-size:var(--fs-5);border-radius:6px}
+
+.acct-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* 修改密码弹层 */
+.pwd-box{padding:22px 22px 18px}
+
+.pwd-box h3{margin:0 0 14px;font-size:17px;color:var(--ink)}
+
+.pwd-form{display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
+
+.pwd-form label{display:flex;flex-direction:column;gap:5px;font-size:var(--fs-5);color:#33414f}
+
+.pwd-form input{border:1px solid #d9e3ea;border-radius:8px;padding:9px 11px;font-size:var(--fs-5);outline:none}
+
+.pwd-form input:focus{border-color:var(--teal)}
+
+.pwd-form .form-msg{margin:0}
+
+/* 窄屏降级：侧栏变顶部横向标签，后台仍可用 */
+@media (max-width:900px){
+  .ad-shell{grid-template-columns:1fr}
+  .ad-side{position:static;height:auto;flex-direction:row;align-items:center;gap:12px;
+    padding:12px 14px;flex-wrap:wrap}
+  .ad-nav{flex-direction:row;flex:1 1 auto;gap:6px;overflow-x:auto}
+  .ad-nav-item{white-space:nowrap;font-size:13px;padding:7px 12px}
+  .ad-nav-item.on{box-shadow:inset 0 -3px 0 var(--coral)}
+  /* 底部这排不能藏：退出登录、改密码、操作日志都在这里 */
+  .ad-side-foot{display:flex;flex-direction:row;align-items:center;gap:8px;flex-wrap:wrap;
+    width:100%;padding:8px 6px 0;border-top:1px solid rgba(255,255,255,.14)}
+  .ad-foot-nav{flex-direction:row;border-top:none;padding-top:0;gap:6px}
+  .ad-side-foot .btn-ghost{width:auto;padding:5px 12px;font-size:var(--fs-5)}
+  .ad-side-foot p{display:none}
+  /* 标题行改 flex：搜索框独占一行，避免和说明文字叠在一起 */
+  .ad-panel-title{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px}
+  .ad-panel-hint{margin-left:0}
+  .ad-search{flex:1 1 100%;float:none;margin:10px 0 0 -9px;width:calc(100% + 9px)}
+  .ad-search input{width:100%;padding:9px 12px}
+  body[data-route="admin"] #app{height:auto;overflow:visible}
+  .ad-shell{height:auto;overflow:visible}
+  .ad-main{padding:0 14px 30px;height:auto;overflow:visible}
+  .acct-form{grid-template-columns:1fr}
+  .ad-top{flex-direction:column;align-items:flex-start;gap:12px}
+  .stats,.ad-sum,.card-stats{grid-template-columns:1fr 1fr}
+  .profile-grid{grid-template-columns:1fr}
+}
+
+/* 微信开放标签插槽：标签绝对定位盖在原按钮上，样式与底层按钮完全一致 */
+.weapp-slot{position:relative;display:block}
+
+.weapp-slot wx-open-launch-weapp{position:absolute;left:0;top:0;width:100%;height:100%;
+  display:block;overflow:hidden;z-index:5}
+
+/* 长按保存图片弹层 */
+.img-box img{display:block;width:100%;max-width:360px;height:auto;margin:0 auto 10px;border-radius:10px;
+  border:1px solid #e3ebf1}
+
+.img-tip{font-size:var(--fs-5);color:var(--muted);line-height:1.7;text-align:center;margin:0 0 12px}
+
+.cal-box h3{font-size:17px}
+
+.cal-tip{font-size:var(--fs-5);color:#33414f;line-height:1.75;margin:0 0 12px}
+
+.cal-info{background:#f4f8fa;border:1px solid #e3ebf1;border-radius:10px;padding:12px 14px;
+  font-size:var(--fs-5);line-height:1.85;color:#1f2a37;margin:0 0 14px}
+
+/* 成功页凭证二维码：图居中、说明另起一行 */
+.cred-qr{text-align:center;margin:12px 0 14px}
+
+.cred-qr svg{display:block;margin:0 auto 6px;width:132px;height:132px}
+
+.cred-qr-tip{display:block;font-size:11.5px;color:var(--muted);line-height:1.5}
+
+/* 名单状态与行操作 */
+.td-closed{display:inline-block;padding:1px 8px;border-radius:5px;background:#fdecea;color:#c0392b;font-size:11.5px}
+
+.reg-btn{padding:4px 11px;font-size:var(--fs-5);border-radius:6px;border:1px solid #d9e3ea;background:#fff;
+  color:#33414f;cursor:pointer;font-family:inherit;transition:border-color .15s,color .15s}
+
+.reg-btn:hover{border-color:var(--teal);color:var(--teal)}
+
+.reg-btn-danger:hover{border-color:#e07767;color:#c0392b}
+
+.qr-tip{font-size:11.5px;color:var(--muted);margin:6px 0 0}
+
+.follow-qr{width:160px;height:160px}
+
+.cta-card{position:relative;display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  border:1px solid var(--line);border-radius:14px;background:#fff;padding:14px;
+  font-family:inherit;cursor:pointer;transition:border-color .15s}
+
+.cta-card:active{border-color:var(--teal)}
+
+.cta-card.primary{border-color:#ffd0c2;background:linear-gradient(120deg,#fff7f3,#fff 62%);padding:18px 14px}
+
+.cta-n{flex:0 0 30px;font-size:13px;font-weight:700;color:var(--teal);letter-spacing:.5px}
+
+.cta-body{flex:1;min-width:0}
+
+.cta-body b{display:block;font-size:var(--fs-5);color:var(--ink);margin-bottom:3px}
+
+.cta-card.primary .cta-body b{font-size:17px;color:#7a3a26}
+
+.cta-body small{display:block;font-size:11.5px;color:var(--muted);line-height:1.55}
+
+.cta-go{flex:0 0 auto;font-size:var(--fs-5);font-weight:600;color:#fff;background:var(--teal);
+  border-radius:18px;padding:6px 13px}
+
+.cta-card.primary .cta-go{background:var(--coral);padding:8px 16px;font-size:13px}
+
+.cta-note{font-size:11.5px;color:var(--muted);text-align:center;line-height:1.7;margin:0}
+
+.qr-modal-box{text-align:center}
+
+.qr-modal-img{display:block;width:222px;height:222px;object-fit:contain;margin:0 auto 10px;
+  background:#f4f7f9;border-radius:12px}
+
+.qr-modal-tip{font-size:var(--fs-5);color:var(--body);margin:0 0 14px}
+
+.qr-modal-tip b{color:var(--teal)}
+
+.staff-token{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;
+  color:#5b6b78;word-break:break-all}
+
+.su-head{margin:0 0 14px}
+
+.su-date{font-family:"Songti SC","STSong",Georgia,serif;font-size:var(--fs-5);letter-spacing:2px;
+  color:var(--teal);font-weight:700}
+
+.su-date span{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;
+  font-size:11.5px;letter-spacing:0;margin-left:7px;color:#7c9ba0;font-weight:400}
+
+.su-title span{display:block;font-size:var(--fs-5);color:var(--muted);font-weight:400;
+  margin-top:2px;letter-spacing:.4px}
+
+.su-info{background:linear-gradient(160deg,#f2fbfb,#eef6ff);border:1px solid #e2f0f1;
+  border-radius:12px;padding:9px 12px}
+
+.su-row{display:flex;align-items:center;gap:8px;padding:3px 0}
+
+.su-k{flex:0 0 28px;color:#7c9ba0;font-size:11.5px}
+
+.su-v{flex:1;min-width:0;color:var(--body);font-size:13px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+
+.su-act{flex:0 0 auto;border:1px solid var(--teal);color:var(--teal-d);background:#fff;
+  border-radius:12px;padding:3px 10px;font-size:11.5px;cursor:pointer;font-family:inherit}
+
+.su-act:active{background:#e8f8f7}
+
+.su-nums{display:flex;gap:14px;margin-top:7px;padding-top:7px;border-top:1px dashed #d6e9ea;
+  font-size:11.5px;color:#7c9ba0}
+
+.su-nums b{color:var(--coral);font-size:15px;font-weight:800;margin-right:2px}
+
+.su-note{font-size:var(--fs-6);color:#5b727a;text-align:center;margin:6px 0 0}
+
+/* 浮动标签：标题压在输入框内，聚焦或有值时缩到左上角，省掉一整行标题的高度 */
+.su-form{gap:var(--sp-1);margin-top:2px}
+
+.form .fld{position:relative;display:block}
+
+.fld input,.fld select{width:100%;border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:16px 12px 6px;font-size:15px;background:#fff;color:var(--body);
+  font-family:inherit;outline:none;line-height:1.35}
+
+.fld input:focus,.fld select:focus{border-color:var(--blue)}
+
+.fld-lb{position:absolute;left:13px;top:12px;font-size:15px;color:#8a97a5;
+  pointer-events:none;line-height:1.2;transition:top .15s var(--ease),
+  font-size .15s var(--ease),color .15s}
+
+.fld-lb b{color:var(--coral);font-weight:400;margin-left:1px}
+
+.fld input:focus~.fld-lb,.fld select:focus~.fld-lb{top:5px;font-size:var(--fs-6);color:var(--teal)}
+
+.fld input:not([type="hidden"]):not(:placeholder-shown)~.fld-lb,
+.fld select.has-val~.fld-lb{top:5px;font-size:var(--fs-6);color:#6b8492}
+
+.fld input[type="hidden"]{display:none}
+
+/* 意向方向标题行：左标题、右计数与说明，上限提示不再单列一行 */
+.fld-static{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  font-size:13px;color:#5b7180;margin:4px 0 0}
+
+.fs-opt{color:#9aa8b4;font-size:var(--fs-5)}
+
+.fs-r{display:flex;align-items:baseline;gap:10px;font-size:11.5px;color:#5b727a;
+  flex:0 0 auto}
+
+.fs-r b{font-weight:400;color:var(--teal)}
+
+.fs-r a{color:var(--blue);text-decoration:none;padding:3px 0}
+
+.ev-head{margin:0 0 14px}
+
+.ev-date{font-family:"Songti SC","STSong",Georgia,serif;font-size:var(--fs-5);letter-spacing:2px;
+  color:var(--teal);font-weight:700}
+
+.ev-date span{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;
+  font-size:11.5px;letter-spacing:0;margin-left:7px;color:#7c9ba0;font-weight:400}
+
+.ev-title span{display:block;font-size:var(--fs-5);color:var(--muted);font-weight:400;
+  margin-top:2px;letter-spacing:.4px}
+
+.ev-org{font-size:11.5px;color:#5b727a;margin:0}
+
+.ev-nums{display:flex;background:linear-gradient(160deg,#f2fbfb,#eef6ff);border:1px solid #e2f0f1;
+  border-radius:12px;padding:12px 0;margin:0 0 12px}
+
+.ev-nums div{flex:1;text-align:center;position:relative}
+
+.ev-nums div+div::before{content:"";position:absolute;left:0;top:2px;bottom:2px;width:1px;
+  background:#dfeef0}
+
+.ev-nums b{display:block;font-size:22px;color:var(--coral);font-weight:800;line-height:1.2}
+
+.ev-nums small{display:block;font-size:var(--fs-6);color:#7c9ba0;margin-top:2px}
+
+.ev-panel{background:#fff;border:1px solid #eef3f5;border-radius:12px;padding:12px 14px;
+  margin:0 0 12px}
+
+.ev-panel-t{font-size:13px;font-weight:600;color:var(--ink);margin:0 0 9px}
+
+.ev-blocks{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+
+.ev-blocks div{background:#f8fcfc;border:1px solid #edf6f6;border-radius:9px;padding:9px 10px}
+
+.ev-blocks b{display:block;font-size:13px;color:#12454b;margin-bottom:2px}
+
+.ev-blocks span{display:block;font-size:11.5px;color:#5b727a;line-height:1.4}
+
+/* 五大板块正文：窄屏按 px 断点收字号。
+   为什么不用 clamp：老 iOS 微信（WebView 内核）不认 clamp()，整条 font-size
+   会被判为无效声明直接丢弃，回退成继承的 16px —— 每行只剩 7 个字，
+   「暖心热茶」被拆成「暖 / 心热茶」。px 断点没有兼容风险，代价只是分档不是连续。
+   这些覆盖放在文件最后，特异性与 #view-event 那几条相同且更靠后，能压住它们。 */
+
+.ev-when{padding:10px 14px 8px}
+
+.ev-note{font-size:var(--fs-6);color:#5b727a;text-align:center;margin:4px 0 0}
+
+/* 报名页顶部返回条：一行字交代上下文，不占高度 */
+.su-bar{display:flex;align-items:center;justify-content:space-between;margin:0 0 12px}
+
+.su-back{border:none;background:none;color:var(--teal-d);font-size:13px;padding:4px 0;
+  cursor:pointer;font-family:inherit}
+
+.su-bar-t{font-size:11.5px;color:#5b727a}
+
+.vf-head{text-align:center;margin:0 0 18px}
+
+.vf-who{font-size:var(--fs-5);color:var(--muted);margin:0}
+
+.vf-form{display:flex;flex-direction:column;gap:12px}
+
+.vf-token{display:flex;flex-direction:column;gap:5px;font-size:var(--fs-5);color:#5b7180}
+
+.vf-token input{border:1px solid var(--line);border-radius:10px;padding:10px 12px;
+  font-size:var(--fs-5);outline:none;font-family:inherit}
+
+/* 输入行：码在左、查询在右。查询是「取数」不是「决策」，不该和确认签到一样重 */
+.vf-scan{display:flex;gap:8px;align-items:stretch}
+
+.vf-code{flex:1;min-width:0;height:52px;border:1.5px solid #cfe3ea;border-radius:12px;
+  padding:0 10px;font-size:var(--fs-2);font-family:"SF Mono",Menlo,Consolas,monospace;
+  letter-spacing:3px;text-align:center;background:#fbfdfd;color:var(--blue);
+  outline:none;font-weight:700}
+
+.vf-code:focus{border-color:var(--blue);background:#fff}
+
+.vf-code::placeholder{font-size:13px;letter-spacing:0;color:#9aa8b4;font-weight:400;
+  font-family:-apple-system,"PingFang SC",sans-serif}
+
+.vf-go{flex:0 0 auto;padding:0 20px;border:none;border-radius:12px;background:var(--teal);
+  color:#fff;font-size:var(--fs-5);font-weight:600;font-family:inherit;cursor:pointer}
+
+.vf-go:active{opacity:.88}
+
+.verify-result{margin-top:18px}
+
+/* 结果卡：状态条用实心色、整卡带投影，与上面那块浅色输入区明显分层 */
+.vf-card{background:#fff;border-radius:14px;overflow:hidden;
+  box-shadow:0 8px 24px rgba(15,61,67,.10);animation:uRise .28s var(--ease)}
+
+.vf-bar{font-size:var(--fs-5);font-weight:600;padding:11px 0;letter-spacing:.5px;color:#fff;
+  text-align:center}
+
+.vf-bar-ok{background:#0f9d76}
+
+.vf-bar-warn{background:#e08a34}
+
+.vf-body{padding:18px 16px 16px;text-align:center}
+
+.vf-name{font-size:var(--fs-2);font-weight:700;color:var(--ink);letter-spacing:2px;line-height:1.3}
+
+.vf-phone{font-size:var(--fs-5);color:#4a6570;letter-spacing:1px;margin-top:8px;
+  font-family:"SF Mono",Menlo,monospace}
+
+.vf-meta{font-size:var(--fs-5);color:var(--muted);margin-top:5px}
+
+.vf-when{font-size:var(--fs-5);color:#5b727a;margin-top:14px;padding-top:12px;
+  border-top:1px dashed #eef3f5}
+
+/* 确认签到：绿色实心、宽度直接吃满卡内边距，不做额外缩进（之前那样会看着偏移） */
+.vf-confirm{width:100%;margin-top:16px;padding:15px;border:none;border-radius:12px;
+  background:#0f9d76;color:#fff;font-size:var(--fs-3);font-weight:600;font-family:inherit;
+  cursor:pointer;letter-spacing:1px}
+
+.vf-confirm:active{opacity:.9}
+
+.vf-confirm:disabled{opacity:.6;cursor:default}
+
+.vf-empty{padding:24px 18px;text-align:center;background:#fff8f5;
+  border:1px solid #ffddd2;border-radius:14px}
+
+.vf-empty b{display:block;font-size:var(--fs-3);color:#b45309;margin-bottom:6px}
+
+.vf-empty span{font-size:var(--fs-5);color:#8a6a55;line-height:1.6}
+
+/* 成功页「修改信息」入口：一行小字，不抢凭证的注意力 */
+.cred-edit{text-align:center;margin:10px 0 12px;font-size:13px}
+
+/* 纠错入口：填错了必须能找到它，所以比周边说明文字更重一档
+   （原 12px + 浅灰 + 极淡虚线，实测在成堆的凭证卡片里几乎看不见） */
+.cred-edit a{color:#2f6b75;text-decoration:none;border-bottom:1px dashed #8fb6bc;
+  padding-bottom:1px}
+
+/* 后台：修改报名信息弹层（PC 两列排布） */
+.reg-edit-box{width:460px;max-width:92vw;padding:22px 22px 18px}
+
+.reg-edit-box h3{margin:0 0 16px;font-size:17px;color:var(--ink);text-align:left}
+
+.reg-edit-box .pwd-form{display:grid;grid-template-columns:1fr 1fr;gap:11px 12px;margin:0 0 10px}
+
+.reg-edit-box .pwd-form label{display:flex;flex-direction:column;gap:5px;font-size:var(--fs-5);
+  color:#33414f}
+
+.reg-edit-box .pwd-form input,.reg-edit-box .pwd-form select{border:1px solid #d9e3ea;
+  border-radius:8px;padding:9px 11px;font-size:var(--fs-5);outline:none;font-family:inherit;
+  background:#fff;color:#31454f}
+
+.reg-edit-box .pwd-form .form-msg{grid-column:1/-1;margin:0;min-height:16px}
+
+.reg-edit-box .pwd-form button{grid-column:1/-1;padding:10px}
+
+.reg-edit-tip{font-size:11.5px;color:var(--muted);line-height:1.6;margin:0 0 12px;
+  text-align:center}
+
+.chip-group{gap:8px}
+
+.chip-group .chip{flex:0 0 calc((100% - 24px) / 4);margin:0;padding:7px 4px;font-size:var(--fs-5);
+  justify-content:center;text-align:center;line-height:1.25}
+
+.chip-group .chip:nth-child(n+9){flex:0 1 auto;padding:7px 12px}
+
+/* ==================================================================
+   设计系统收口：通用卡片语言 + 新增页面组件（移动端 480px 内）
+   仅新增类；介绍页 .intro-* / #view-intro 相关规则一律保持原样
+   ================================================================== */
+
+/* ---------- 两套卡片基类 ---------- */
+.u-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--sp-2)}
+
+.u-action{background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;border:none;
+  border-radius:var(--r-lg);padding:var(--sp-2)}
+
+/* ---------- 报名页：滚动区 / 固定尾栏 / 进度 / 选填折叠 ---------- */
+.su-page{display:flex;flex-direction:column;gap:var(--sp-1);
+  min-height:calc(100vh - 56px);min-height:calc(100dvh - 56px)}
+
+.su-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  display:flex;flex-direction:column;gap:var(--sp-1);padding-bottom:var(--sp-1)}
+
+.su-foot{position:sticky;bottom:0;z-index:6;display:flex;flex-direction:column;gap:var(--sp-1);
+  background:#fff;border-top:1px solid var(--line);
+  box-shadow:0 -6px 18px rgba(15,61,67,.06);
+  padding:var(--sp-2) var(--sp-2) max(var(--sp-2), calc(var(--sp-1) + env(safe-area-inset-bottom)));
+  margin:0 -16px}
+
+.su-progress{margin:0;font-size:var(--fs-6);color:var(--muted);text-align:center;line-height:1.4}
+
+/* ---------- 数据叙事行 ---------- */
+.su-rank,.ck-rank{display:block;width:fit-content;max-width:100%;margin:var(--sp-1) auto;
+  padding:var(--sp-1) var(--sp-2);background:#f7fbfd;border-radius:999px;
+  font-size:var(--fs-6);color:var(--muted);text-align:center;line-height:1.5}
+
+.rank-num{margin:0 2px;font-size:var(--fs-5);font-weight:800;color:var(--coral)}
+
+.is-hidden{display:none!important}
+
+/* ---------- 后台报名画像 ---------- */
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-2)}
+
+.profile-item{min-width:0;background:#f6f9fb;border:1px solid var(--line);
+  border-radius:var(--r-sm);padding:var(--sp-2)}
+
+.profile-item h4,.profile-item .pi-t{margin:0 0 var(--sp-1);font-size:var(--fs-5);
+  font-weight:600;color:var(--body)}
+
+.profile-item .pi-v{font-size:var(--fs-3);font-weight:700;color:var(--ink)}
+
+.profile-bar{height:8px;margin-top:var(--sp-1);border-radius:999px;background:#e9f1f4;overflow:hidden}
+
+.profile-bar i{display:block;height:100%;width:0;border-radius:999px;
+  background:linear-gradient(90deg,var(--teal),var(--blue));transition:width .3s var(--ease)}
+
+/* ---------- 凭证二维码放大层 ---------- */
+.u-zoom{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;
+  padding:var(--sp-3);background:rgba(15,23,34,.86);cursor:zoom-out}
+
+.u-zoom-img{display:block;max-width:100%;max-height:86vh;width:auto;height:auto;
+  background:#fff;border-radius:var(--r-lg);box-shadow:0 16px 48px rgba(0,0,0,.35)}
+
+/* ---------- 状态页温和提示卡（与 .ck-card 同用） ---------- */
+.ck-manual,.ck-pending{background:#f7fbfd;border:1px solid var(--line);
+  border-radius:var(--r-lg);padding:var(--sp-2);text-align:center}
+
+.ck-pending{background:#fff8f5;border-color:#ffddd2}
+
+.ck-manual p,.ck-pending p{margin:var(--sp-1) 0 0;font-size:var(--fs-5);
+  color:var(--muted);line-height:1.7}
+
+.gate-extra{display:flex;flex-wrap:wrap;gap:var(--sp-1);margin-top:var(--sp-2);
+  padding-top:var(--sp-2);border-top:1px dashed #dde5eb}
+
+.gate-extra .ge-row{display:flex;align-items:center;justify-content:space-between;
+  gap:var(--sp-2);width:100%;font-size:var(--fs-5);color:var(--body)}
+
+.gate-extra .btn-ghost{padding:6px 14px;font-size:var(--fs-6);border-radius:var(--r-sm)}
+
+/* ---------- 收尾：画像数值、可引用句子、放大层提示 ---------- */
+.profile-item>span{display:block;font-size:var(--fs-6);color:var(--muted);line-height:1.4}
+
+.profile-item>b{display:block;font-size:var(--fs-3);font-weight:700;color:var(--ink);line-height:1.3}
+
+.profile-sentence{margin:0 0 var(--sp-1);font-size:var(--fs-5);color:var(--body);line-height:1.75}
+
+.profile-sentence b{color:var(--coral);font-weight:700}
+
+.u-zoom-box{display:flex;flex-direction:column;align-items:center;gap:var(--sp-2)}
+
+.u-zoom-tip{margin:0;color:#fff;font-size:var(--fs-5);opacity:.85}
+
+.gate-extra-row,.ge-row{display:flex;align-items:center;justify-content:space-between;
+  gap:var(--sp-2);width:100%;font-size:var(--fs-5);color:var(--body)}
+
+.gate-extra-row b,.ge-row b{color:var(--teal-d);font-weight:600}
+
+/* 放大图在窄屏内留边 */
+.u-zoom-img{max-width:86vw;max-height:70vh;padding:var(--sp-1);border-radius:var(--r-sm)}
+
+/* ========== 12-12 改：全展开 + 紧凑排版 + 自定义下拉 ========== */
+
+/* 鸿蒙/微信 WebView 会按系统字号整体放大文字，导致选项 chip 折行。
+   活动页版式固定，禁止浏览器自动放大；viewport 已锁缩放，不影响手动缩放。 */
+html{-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important}
+
+/* 自定义下拉：按钮伪装成输入框，hidden input 保留原 name 供表单取值 */
+.fld-pick{position:relative;display:flex;align-items:center;width:100%;min-height:44px;
+  border:1px solid var(--line);border-radius:var(--r-sm);background:#fff;
+  color:var(--body);font-family:inherit;font-size:var(--fs-4);line-height:1.25;
+  padding:14px 30px 5px 12px;text-align:left;cursor:pointer;
+  -webkit-appearance:none;appearance:none}
+
+.fld-pick:focus{outline:none;border-color:var(--blue)}
+
+.fld-pick-v{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+
+.fld-pick-arrow{position:absolute;right:13px;top:44%;width:7px;height:7px;
+  border-right:1.5px solid #9aa8b4;border-bottom:1.5px solid #9aa8b4;
+  transform:rotate(45deg);pointer-events:none}
+
+.fld.has-val .fld-lb{top:5px;font-size:var(--fs-6);color:#6b8492}
+
+.fld:not(.has-val) .fld-pick-v{visibility:hidden}
+
+.wk-pick .fld-pick{padding:10px 30px 10px 12px;margin-top:6px}
+
+/* 未选是占位灰，选了之后要转成正文色——否则「男」和「请选择」看起来一样浅，
+   人以为自己没选上，会反复点开重选 */
+.wk-pick .fld-pick-v{visibility:visible;color:#8a97a5}
+
+.wk-pick.has-val .fld-pick-v{color:var(--ink)}
+
+/* 选项层：页面内弹层，替代各系统各自的滚轮选择器 */
+.pick-box{width:86%;max-width:420px;background:#fff;border-radius:var(--r-lg);
+  padding:var(--sp-3) var(--sp-2) var(--sp-2)}
+
+.pick-box h3{margin:0 0 var(--sp-2);font-size:var(--fs-3);color:var(--ink);text-align:center}
+
+.pick-opts{display:flex;flex-direction:column;gap:var(--sp-1);margin-bottom:var(--sp-2)}
+
+.pick-opt{min-height:48px;border:1px solid var(--line);border-radius:var(--r-sm);
+  background:#fff;color:var(--body);font-family:inherit;font-size:var(--fs-4);
+  cursor:pointer;padding:10px}
+
+.pick-opt.on{border-color:var(--teal);background:#eefafa;color:var(--teal-d);font-weight:600}
+
+/* ========== 微信分享引导：悬浮球 + 右上角指路气泡 ==========
+ * 不再用底部横条：它横跨整宽且贴底，压住报名按钮与正文。
+ * 改成：右侧一顆悬浮球（滚动时收起、静止淡入），点击弹右上角气泡，箭头直指微信「···」。
+ * 气泡 3 秒自动消失，不占版面、不打断阅读。
+ */
+.share-fab{position:fixed;right:10px;z-index:58;
+  /* 默认抬到 96px：内页底部是整宽的操作条/页脚，球落进去会跟它同行显脏 */
+  bottom:calc(env(safe-area-inset-bottom,0px) + 96px);
+  width:46px;height:46px;padding:0;border:0;border-radius:50%;
+  background:transparent;cursor:pointer;line-height:0;
+  box-shadow:0 4px 14px rgba(15,61,67,.26);
+  transition:transform .25s var(--ease),opacity .25s var(--ease)}
+
+/* 报名成功页是满屏卡片，没有整宽底条，球贴底落在卡片外的空白区；
+ * 若沿用 96px 会正好压住「去领卡」按钮。 */
+body[data-route="success"] .share-fab{bottom:calc(env(safe-area-inset-bottom,0px) + 16px)}
+
+.share-fab img{width:100%;height:100%;border-radius:50%;display:block}
+
+/* 页面滚动时收起，避免遮阅读；静止后淡入 */
+.share-fab.is-hidden{transform:scale(.6) translateX(18px);opacity:0;pointer-events:none}
+
+.share-fab:active{transform:scale(.92)}
+
+/* 分享指引蒙层：点击悬浮球后出现，把注意力聚焦到右上角「···」。
+ * 不用浮层气泡：活动标题是全宽的，任何右上角气泡都会压住标题；
+ * 蒙层之下压什么都是「刻意引导」，不构成遮挡问题。3 秒后自动消失。
+ *
+ * 挖洞做法：外层不铺底色，由高亮圈的巨幅 box-shadow 铺满四周，
+ * 圈内因为元素本身透明而透出页面，形成「只亮右上角」的效果。 */
+.share-hint{position:fixed;inset:0;z-index:70;
+  display:flex;align-items:center;justify-content:center;
+  animation:shareHintIn .22s var(--ease)}
+
+/* 高亮圈：罩住微信胶囊（···）按钮位置。尺寸/边距按 iOS 微信胶囊实测取值 */
+.share-hint-ring{position:absolute;right:7px;
+  top:calc(env(safe-area-inset-top,0px) + 7px);
+  width:87px;height:32px;border-radius:16px;
+  box-shadow:0 0 0 3000px rgba(9,32,35,.64);
+  outline:2px solid var(--coral);outline-offset:1px;
+  animation:shareRingPulse 1.1s ease-in-out infinite}
+
+/* 说明气泡：居中偏上，白底深字，3 秒后随蒙层一起消失 */
+.share-hint-bubble{position:relative;z-index:1;
+  margin-top:-40px;max-width:calc(100% - 64px);
+  padding:13px 20px;border-radius:24px;
+  background:#fff;color:var(--ink);
+  font-size:var(--fs-4);line-height:1.5;text-align:center;
+  box-shadow:0 10px 30px rgba(0,0,0,.32);
+  animation:shareBubbleIn .28s var(--ease)}
+
+@keyframes shareHintIn{from{opacity:0}to{opacity:1}}
+
+@keyframes shareBubbleIn{from{opacity:0;transform:translateY(12px) scale(.94)}
+  to{opacity:1;transform:translateY(0) scale(1)}}
+
+@keyframes shareRingPulse{0%,100%{outline-color:var(--coral)}
+  50%{outline-color:rgba(255,107,74,.3)}}
+
+@media (prefers-reduced-motion:reduce){
+  .share-hint,.share-hint-bubble{animation:none}
+  .share-hint-ring{animation:none}}
+
+/* ==================================================================
+   V2 设计语言：令牌 + 动效工具类（新增，逐步替换旧规则）
+   ================================================================== */
+:root{
+  /* 字号 6 档，取消 11.5 及以下 */
+  --fs-xs:12px; --fs-sm:13px; --fs-md:15px; --fs-lg:17px; --fs-xl:22px; --fs-2xl:28px;
+  /* 行高 3 档 */
+  --line-title:1.25; --line-body:1.5; --line-note:1.75;
+  /* 圆角 3 档 */
+  --r-ctl:8px; --r-card:14px; --r-pill:22px;
+  /* 触控下限 */
+  --tap:44px;
+  /* 动效时长 */
+  --dur-fast:120ms; --dur-base:280ms; --dur-slow:420ms;
+}
+
+/* 入场：同层元素加 .u-in，父级 .u-seq 让其自动错开 60ms */
+.u-in{animation:introUp var(--dur-slow) var(--ease) backwards}
+
+.u-seq>*{animation:introUp var(--dur-slow) var(--ease) backwards}
+
+.u-seq>*:nth-child(2){animation-delay:60ms}
+
+.u-seq>*:nth-child(3){animation-delay:120ms}
+
+.u-seq>*:nth-child(4){animation-delay:180ms}
+
+.u-seq>*:nth-child(5){animation-delay:240ms}
+
+.u-seq>*:nth-child(n+6){animation-delay:300ms}
+
+/* 按压：所有可点元素加 .u-press */
+.u-press{transition:transform var(--dur-fast) var(--ease)}
+
+.u-press:active{transform:scale(.97)}
+
+/* 引导：全页只给一个焦点元素用 */
+.u-focus{animation:introGlow 2.4s ease-in-out infinite}
+
+/* 全局降低动效：尊重系统设置，一次性兜底 */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .intro-bg{transform:none}
+  .intro-en{opacity:.58}
+}
+
+/* ==================================================================
+   V2 · 转化链路：三份领取的权重改造
+   目标：不是把按钮做大，是让"该点的那个"成为唯一的主角
+   ================================================================== */
+
+/* 1) 首位卡升格：高度 46 → 72，浅珊瑚底 + 投影，从"条目"变"主推" */
+.ck-gifts .cta-card:first-of-type{
+  padding:15px 14px;border-radius:14px;min-height:72px;gap:10px;
+  background:linear-gradient(118deg,#fff5f1 0%,#fff 60%);
+  border-color:#ffd6c8;box-shadow:0 6px 18px rgba(255,107,74,.10)}
+
+.ck-gifts .cta-card:first-of-type .cta-body b{font-size:16px;color:#7a3a26;margin-bottom:3px}
+
+.ck-gifts .cta-card:first-of-type .cta-body small{font-size:12px;color:#a0705f;line-height:1.45}
+
+.ck-gifts .cta-card:first-of-type .cta-go{
+  background:linear-gradient(96deg,var(--coral),var(--coral-l));color:#fff;
+  box-shadow:0 4px 12px rgba(255,107,74,.30)}
+
+/* 2) 呼吸光：全页唯一在动的元素 */
+.ck-gifts .cta-card:first-of-type::after{
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:14px;
+  background:radial-gradient(120% 92% at 16% 0%,rgba(255,138,106,.20),rgba(255,138,106,0) 60%);
+  animation:ctaBreath 2.6s ease-in-out infinite}
+
+@keyframes ctaBreath{0%,100%{opacity:.30}50%{opacity:.92}}
+
+/* 3) 入场编排：三张依次上浮，视线最后落在主推卡上 */
+.ck-gifts .cta-card{animation:ckIn .42s var(--ease) backwards}
+
+.ck-gifts .cta-card:nth-of-type(1){animation-delay:.10s}
+
+.ck-gifts .cta-card:nth-of-type(2){animation-delay:.20s}
+
+.ck-gifts .cta-card:nth-of-type(3){animation-delay:.30s}
+
+@keyframes ckIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* 4) 按压反馈：替代原来只有边框变色 */
+.cta-card,.btn-primary,.btn-ghost,.su-act,.chip{
+  transition:transform .12s var(--ease),border-color .15s,background .15s}
+
+.cta-card:active,.btn-primary:active,.btn-ghost:active,.su-act:active,.chip:active{
+  transform:scale(.97)}
+
+/* 报名进度：文字之外给一条可视进度 */
+.su-progress{position:relative;padding-left:0}
+
+.su-progress::after{content:"";display:block;height:3px;border-radius:2px;margin-top:6px;
+  background:linear-gradient(90deg,var(--teal),var(--blue));width:var(--p,0%);
+  transition:width .32s var(--ease);opacity:.85}
+
+/* 核销页：签到台用，字大、目标大、一眼可辨 */
+.vf-go{min-height:var(--tap);padding:0 22px;border-radius:12px;font-size:var(--fs-md);font-weight:600}
+
+.vf-code{min-height:var(--tap);font-size:var(--fs-lg);letter-spacing:2px}
+
+.vf-bar{padding:12px 16px;font-size:var(--fs-md);font-weight:700;letter-spacing:.5px}
+
+.vf-name{font-size:var(--fs-2xl);line-height:1.2}
+
+/* V2 · 状态页：六种语义各自的徽章色 */
+.ok-badge.st-info{background:linear-gradient(135deg,var(--blue-l),var(--blue));
+  box-shadow:0 6px 16px rgba(47,109,240,.22)}
+
+.ok-badge.st-go{background:linear-gradient(135deg,var(--coral-l),var(--coral));
+  box-shadow:0 6px 16px rgba(255,107,74,.24)}
+
+.ok-badge.st-off{background:linear-gradient(135deg,#b8c6ce,#94a6b1);
+  box-shadow:0 6px 16px rgba(148,166,177,.20)}
+
+.ok-badge.st-end{background:linear-gradient(135deg,var(--teal-l),var(--teal));
+  box-shadow:0 6px 16px rgba(27,169,160,.20)}
+
+/* 空态：不是一行灰字，给个看得见的落点 */
+.td-empty{color:#8a9aa6;font-size:13px;padding:46px 12px!important;text-align:center}
+
+.td-empty::before{content:"○";display:block;font-size:26px;color:#cfdde3;
+  margin-bottom:10px;line-height:1}
+
+/* 后台账号管理：删除按钮要能一眼认出是危险动作 */
+.acct-btn.is-danger{color:#d9483b;border-color:#f3c4bd;background:#fff7f5}
+
+.acct-btn.is-danger:hover{background:#ffece8;border-color:#e79b8f}
+
+/* ==================================================================
+   现场开关：三张等价卡片并排，宽屏一行三列，窄屏自动折行
+   ================================================================== */
+.gate-panel{display:block;background:none;border:0;padding:0;gap:0}
+
+/* 旧规则是带底的 flex 容器，会压成一列并多包一层皮 */
+.sw-grid{width:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+
+.sw-card{display:flex;flex-direction:column;gap:7px;padding:14px 16px;
+  border:1px solid #e8eef2;border-radius:12px;background:#fff;
+  transition:border-color .15s,box-shadow .15s}
+
+.sw-card.is-on{border-color:#d8ebe8}
+
+.sw-name{font-size:12.5px;font-weight:600;color:#7b939e;letter-spacing:.4px}
+
+.sw-state{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;
+  color:#12333d;line-height:1.25;letter-spacing:.2px}
+
+.sw-state i{flex:0 0 auto;width:7px;height:7px;border-radius:50%;background:#c3d0d7}
+
+.sw-card.is-on .sw-state{color:var(--teal-d)}
+
+.sw-card.is-on .sw-state i{background:var(--teal);box-shadow:0 0 0 3px rgba(27,169,160,.15)}
+
+.sw-card.is-off .sw-state{color:#8a9aa6}
+
+/* 中间态：人工已开启、但当前不在签到时段。既不是绿的"开放中"，也不是灰的"已关闭" */
+.sw-card.is-hold{border-color:#f0e2cc;background:#fffdf8}
+
+.sw-card.is-hold .sw-state{color:#a9761f}
+
+.sw-card.is-hold .sw-state i{background:#e0a03a;box-shadow:0 0 0 3px rgba(224,160,58,.16)}
+
+.sw-note{font-size:12px;color:#8a9aa6;line-height:1.6;min-height:19px}
+
+.sw-ops{display:flex;gap:8px;margin-top:auto;padding-top:6px;flex-wrap:wrap}
+
+.sw-ops .btn-ghost{min-height:34px;padding:0 14px;font-size:12.5px;border-radius:8px;
+  color:var(--teal-d);border-color:#cfe6e3;background:#fff}
+
+.sw-ops .btn-ghost:hover{background:#f2faf9;border-color:#a9d8d4}
+
+.sw-ops .btn-ghost[disabled]{opacity:.4;cursor:not-allowed;background:#f6f9fb;
+  border-color:#e4ecf0;color:#8a9aa6}
+
+/* 旧的两行散排容器已并入三列，空时不要留一段空白 */
+.gate-extra:empty{display:none}
+
+/* 卡片右上角：编辑入口 */
+.sw-card{position:relative}
+
+.sw-edit{position:absolute;right:10px;top:10px;padding:3px 10px;font-size:12px;
+  color:#5f7a86;background:#fff;border:1px solid #e0e9ee;border-radius:7px;
+  cursor:pointer;font-family:inherit;transition:color .15s,border-color .15s,background .15s}
+
+.sw-edit:hover{color:var(--teal-d);border-color:#a9d8d4;background:#f6fbfa}
+
+/* 签到窗口弹窗 */
+.gw-box h3{margin:0 0 6px}
+
+.gw-tip{font-size:12.5px;color:#8a9aa6;line-height:1.65;margin:0 0 16px}
+
+.gw-box label{display:block;font-size:13px;color:#5b7180;margin-bottom:14px}
+
+.gw-box input[type="datetime-local"]{display:block;width:100%;margin-top:6px;padding:11px 12px;
+  font-size:15px;font-family:inherit;color:#12333d;background:var(--surface-soft);
+  border:1px solid #dfe8ee;border-radius:10px}
+
+.gw-box input[type="datetime-local"]:focus{background:#fff;border-color:var(--teal);outline:none;
+  box-shadow:0 0 0 3px rgba(27,169,160,.12)}
+
+/* iPhone 11 Pro 等窄高屏：正文可能压到建筑上，用白色柔光把字托出来 */
+.intro-desc,.intro-sign{
+  text-shadow:0 0 2px #fff,0 0 4px #fff,0 0 7px #fff,0 0 12px #fff,
+              0 0 20px rgba(255,255,255,.92),0 1px 1px #fff}
+
+/* 812 / 800 这类"比 SE 高、比 844 矮"的机型：压缩纵向节奏，尽量不让正文压到建筑 */
+@media (min-height:701px) and (max-height:825px){
+  .intro-layer{padding-top:calc(env(safe-area-inset-top) + 2.6vh)}
+  .intro-brand{margin:1.8vh 0 0}
+  .intro-slogan{margin:3.2vh 0 0}
+  .intro-welcome{margin:3vh 0 0}
+  .intro-desc{margin:1.5vh 0 0}
+  .intro-sign{margin:6px 0 0}
+}
+
+/* 签到未开放：中性灰徽章，表示"暂时不可用"而不是报错 */
+.ck-badge.ck-badge-off{background:linear-gradient(135deg,#b8c6ce,#93a5b0);
+  box-shadow:0 6px 16px rgba(147,165,176,.20)}
+
+/* ==================================================================
+   时间选择：日期用日历，时分用下拉（替代原生 datetime-local 的无限滚轮）
+   ================================================================== */
+.gw-field{margin-bottom:14px}
+
+.gw-lb{display:block;font-size:13px;color:#5b7180;margin-bottom:6px}
+
+.dt{display:flex;align-items:center;gap:6px}
+
+.dt-date{flex:1 1 auto;min-width:0;padding:10px 12px;font-size:14px;font-family:inherit;
+  color:#12333d;background:var(--surface-soft);border:1px solid #dfe8ee;border-radius:10px}
+
+.dt-h,.dt-m{flex:0 0 auto;width:66px;padding:10px 4px;font-size:14px;font-family:inherit;
+  color:#12333d;background:var(--surface-soft);border:1px solid #dfe8ee;border-radius:10px;
+  cursor:pointer;text-align:center}
+
+.dt-colon{color:#8a9aa6;font-size:14px;line-height:1;margin:0 -2px}
+
+.dt-date:focus,.dt-h:focus,.dt-m:focus{background:#fff;border-color:var(--teal);outline:none;
+  box-shadow:0 0 0 3px rgba(27,169,160,.12)}
+
+/* ==================================================================
+   运营导流区（三份领取）的视觉重量
+   原则：不进强流程，就靠"看得见 + 会动 + 节奏一致"争取注意力
+   ================================================================== */
+
+/* 1) 三张卡统一高度与内边距：主推卡只靠颜色区分，不靠尺寸，避免"没做好"的错位感 */
+.ck-gifts .cta-card{min-height:68px;padding:10px 12px;margin:0 0 8px;border-radius:12px;
+  align-items:center;position:relative;overflow:hidden}
+
+.ck-gifts .cta-card:first-of-type{min-height:68px;padding:10px 12px}
+
+/* 2) 药丸按钮统一 72×30，文字三字对齐，视觉上成为一组 */
+.ck-gifts .cta-go{flex:0 0 auto;width:72px;height:30px;padding:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  border-radius:15px;font-size:12.5px;font-weight:600;letter-spacing:.2px;
+  animation:pillPop 3.2s cubic-bezier(.34,1.56,.64,1) infinite}
+
+.ck-gifts .cta-card:nth-of-type(2) .cta-go{animation-delay:.35s}
+
+.ck-gifts .cta-card:nth-of-type(3) .cta-go{animation-delay:.7s}
+
+/* Q 弹：每轮只在后 26% 弹一次，其余时间静止，不烦人但抓得住眼 */
+@keyframes pillPop{
+  0%,74%,100%{transform:scale(1)}
+  80%{transform:scale(1.08)}
+  87%{transform:scale(.98)}
+  93%{transform:scale(1.02)}
+}
+
+/* 3) 三张卡依次扫过一道柔光：7 秒一轮，错开 0.5 秒，像被依次点名 */
+.ck-gifts .cta-card::before{
+  content:"";position:absolute;top:0;left:0;width:45%;height:100%;pointer-events:none;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.72),transparent);
+  transform:translateX(-130%);opacity:0;
+  animation:cardSweep 7s ease-in-out infinite}
+
+.ck-gifts .cta-card:nth-of-type(2)::before{animation-delay:.5s}
+
+.ck-gifts .cta-card:nth-of-type(3)::before{animation-delay:1s}
+
+@keyframes cardSweep{
+  0%,72%{transform:translateX(-130%);opacity:0}
+  76%{opacity:1}
+  92%{transform:translateX(330%);opacity:0}
+  100%{transform:translateX(-130%);opacity:0}
+}
+
+/* 4) 区块标题：青蓝渐变缓慢流动，替代原来的一行灰字 */
+.ck-gifts-t{margin:0 0 10px;
+  background:linear-gradient(90deg,var(--teal-d) 0%,var(--teal) 26%,var(--teal-mid) 50%,var(--teal) 74%,var(--teal-d) 100%);
+  background-size:250% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  font-weight:600;letter-spacing:.5px;
+  animation:titleFlow 7s linear infinite}
+
+@keyframes titleFlow{0%{background-position:0% 50%}100%{background-position:250% 50%}}
+
+/* 系统开了"减弱动态效果"时，以上循环全部停掉，静态也好看 */
+@media (prefers-reduced-motion:reduce){
+  .ck-gifts .cta-go,.ck-gifts .cta-card::before,.ck-gifts-t{margin:0 0 10px;animation:none!important}
+  .ck-gifts-t{margin:0 0 10px;color:var(--teal-d);background:none;-webkit-text-fill-color:var(--teal-d)}
+}
+
+@keyframes evPop{
+  0%,74%,100%{transform:scale(1)}
+  82%{transform:scale(1.025)}
+  90%{transform:scale(.995)}
+}
+
+@media (prefers-reduced-motion:reduce){
+  #view-event .actions .btn-primary{animation:none}
+}
+
+/* 极矮屏（<720）再收一档，宁可挤一点也不让它滚 */
+@media (max-height:720px){
+  #view-event{padding-top:10px}
+  #view-event .ev-title{font-size:17px}
+  #view-event .ev-title span{font-size:11.5px;margin-top:4px}
+  #view-event .ev-nums{padding:8px 0;margin-bottom:8px}
+  #view-event .ev-nums b{font-size:20px}
+  #view-event .ev-panel{padding:9px 12px;margin-bottom:8px}
+  #view-event .ev-blocks div{padding:6px 9px}
+  #view-event .ev-blocks span{font-size:10px}
+  #view-event .ev-row{padding:6px 0}
+  #view-event .su-act{height:30px;min-width:68px}
+}
+
+/* ==================================================================
+   加日历兜底弹窗：把一段话拆成三步，先给眼睛落脚点
+   ================================================================== */
+.cal-box{text-align:center;padding:22px 20px 14px}
+
+.cal-ic{width:46px;height:46px;margin:0 auto 12px;border-radius:14px;
+  background:linear-gradient(140deg,#e6f7f5,#eaf1fd);color:var(--teal);
+  display:flex;align-items:center;justify-content:center}
+
+.cal-ic svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;
+  stroke-linecap:round;stroke-linejoin:round}
+
+.cal-box h3{font-size:16.5px;margin:0 0 6px;color:var(--ink);letter-spacing:.2px}
+
+.cal-box .cal-tip{font-size:12.5px;color:#8a9aa6;margin:0 0 16px;line-height:1.6}
+
+.cal-steps{list-style:none;counter-reset:cs;margin:0 0 16px;padding:0;text-align:left}
+
+.cal-steps li{counter-increment:cs;position:relative;padding:7px 0 7px 30px;
+  font-size:13px;color:var(--body);line-height:1.5}
+
+.cal-steps li::before{content:counter(cs);position:absolute;left:0;top:7px;
+  width:20px;height:20px;border-radius:50%;background:#eef9f8;color:var(--teal-d);
+  font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+.cal-steps li b{color:var(--ink);font-weight:600}
+
+.cal-box .cal-info{background:#f7fbfc;border:1px solid #e8f2f4;border-radius:12px;
+  padding:11px 14px;text-align:left;font-size:12.5px;line-height:1.9;color:#5b7180;
+  margin:0 0 16px}
+
+.cal-box .cal-row{display:flex;gap:8px;align-items:flex-start}
+
+.cal-box .cal-row+.cal-row{margin-top:7px}
+
+.cal-box .cal-info-k{flex:0 0 auto;padding-top:1px;color:#a8bcc4;font-size:11px;min-width:28px}
+
+.cal-box .cal-info-v{flex:1;min-width:0}
+
+.cal-skip{display:block;width:100%;margin-top:4px;padding:11px;border:none;background:none;
+  color:#9aadb6;font-size:13px;font-family:inherit;cursor:pointer}
+
+.cal-skip:active{color:#6b8490}
+
+@media (max-height:720px){
+  .cal-box{padding:18px 18px 10px}
+  .cal-ic{width:40px;height:40px;margin-bottom:9px}
+  .cal-steps li{padding:5px 0 5px 28px}
+  .cal-box .cal-tip{margin-bottom:12px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  #checkin-state > .ck-card-done .ck-flow,
+  #checkin-state > .ck-card-done .ck-gifts{margin-top:auto}
+}
+
+/* ===== v67：iOS 微信内不再写历史后，品牌条左侧补页内返回 ===== */
+.brand-back{position:absolute;left:7px;top:50%;transform:translateY(-50%);
+  width:30px;height:30px;border:0;border-radius:50%;padding:0;color:#fff;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.2);box-shadow:inset 0 0 0 1px rgba(255,255,255,.45);
+  animation:backPulse 3.2s var(--ease) infinite;transition:background .2s}
+
+.brand-back::after{content:'';position:absolute;inset:-8px}
+
+.brand-back svg{animation:backTip 3.2s var(--ease) infinite}
+
+.brand-back:active{background:rgba(255,255,255,.38)}
+
+body[data-back="1"] .brand-back{display:flex}
+
+body[data-back="1"] .brand-main{padding-left:30px}
+
+@keyframes backPulse{
+  0%,100%{background:rgba(255,255,255,.17);box-shadow:inset 0 0 0 1px rgba(255,255,255,.38),0 0 0 0 rgba(255,255,255,0)}
+  50%{background:rgba(255,255,255,.28);box-shadow:inset 0 0 0 1px rgba(255,255,255,.55),0 0 0 4px rgba(255,255,255,.1)}
+}
+
+@keyframes backTip{
+  0%,84%,100%{transform:translateX(0)}
+  89%{transform:translateX(-2.5px)}
+  94%{transform:translateX(0)}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .brand-back,.brand-back svg{animation:none}
+}
+
+/* ==================================================================
+   v70 · 报名表两步流程（区号 / 海外经历 / 留学国家 / 17 类意向）
+   结构来自 demo-signup，沿用本文件既有 su-page / su-scroll / su-foot 骨架，
+   这里只补新组件：步骤条、两个 pane、区号输入、是/否分段、国家网格、意向网格。
+   ================================================================== */
+
+/* 步骤条：顶部细进度 + 一行说明。flex 子项不参与压缩，滚动交给 .su-scroll */
+/* 右侧留 40px：右上角有固定的背景音乐按钮（34px + right:14px），
+   步骤条右侧进度文字原来顶到 372px，正好被按钮压住「40%」这几个字 */
+.steps{flex:0 0 auto;padding:0 40px 8px 2px}
+
+.step-bar{height:4px;border-radius:2px;background:#eef3f7;overflow:hidden}
+
+.step-bar i{display:block;height:100%;width:0;border-radius:2px;
+  background:linear-gradient(90deg,var(--teal),var(--blue));
+  transition:width .4s cubic-bezier(.22,1,.36,1)}
+
+.step-txt{display:flex;justify-content:space-between;align-items:baseline;gap:8px;
+  margin-top:6px;font-size:11px;color:var(--muted);line-height:1.3}
+
+.step-txt b{color:var(--ink);font-weight:500;white-space:nowrap}
+
+.step-pane.out{animation:paneOut .16s ease forwards}
+
+.step-pane.in{animation:paneIn .28s cubic-bezier(.22,1,.36,1)}
+
+@keyframes paneOut{to{opacity:0;transform:translateX(-12px)}}
+
+@keyframes paneIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+
+/* 两列等宽：姓名/性别、区号/手机 */
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+
+.cc-wrap .plus{flex:0 0 auto;font-size:16px;line-height:1.2;color:var(--body);pointer-events:none}
+
+/* 是 / 否 分段 */
+.seg2{display:flex;gap:8px;margin-top:6px}
+
+.seg2 button{flex:1;height:44px;border:1px solid var(--line);border-radius:10px;background:#fff;
+  font:inherit;font-size:15px;color:#4a5a6a;transition:.18s}
+
+.seg2 button.on{border-color:var(--teal);background:rgba(27,169,160,.08);
+  color:#0f6e56;font-weight:500}
+
+/* 留学国家：4 列等宽，12 项正好三行 */
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
+
+.grid4 button{height:38px;border:1px solid var(--line);border-radius:9px;background:#fff;
+  font:inherit;font-size:12px;color:var(--body);padding:0 2px;line-height:1.1;
+  white-space:nowrap;overflow:hidden;transition:.16s}
+
+.grid4 button.on{border-color:var(--teal);background:rgba(27,169,160,.09);
+  color:#0f6e56;font-weight:500}
+
+/* 意向方向：17 类，两列等宽，末位「其他」整行 */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}
+
+.gcell{position:relative;display:flex;align-items:center;justify-content:center;
+  min-height:44px;padding:6px 8px;border:1px solid var(--line);border-radius:10px;
+  background:#fff;font:inherit;font-size:13px;color:var(--ink);line-height:1.25;
+  text-align:center;transition:.16s cubic-bezier(.22,1,.36,1)}
+
+.gcell.wide{grid-column:1/-1}
+
+.gcell.on{border-color:var(--teal);background:rgba(27,169,160,.09);color:#0f6e56;font-weight:500}
+
+.gcell.on::after{content:'';position:absolute;top:6px;right:7px;width:5px;height:8px;
+  border-right:1.6px solid var(--teal);border-bottom:1.6px solid var(--teal);transform:rotate(42deg)}
+
+/* 区块小标题与说明 */
+.sec-t{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  margin:10px 0 0;font-size:13px;color:#5b7180}
+
+.sec-t b{color:var(--ink);font-weight:500;font-size:13.5px}
+
+.sec-t .sec-opt{font-weight:400;color:#9aa8b4;font-size:12px}
+
+.sec-t .cnt{font-size:11px;color:var(--muted)}
+
+.help-link{font-size:11.5px;color:var(--blue);text-decoration:none;
+  border-bottom:1px dashed rgba(47,109,240,.4)}
+
+.help-hint{margin:8px 0 0;font-size:11.5px;line-height:1.5;color:#5b727a;
+  background:#f7fbfd;border-radius:8px;padding:8px 10px}
+
+.back-link{align-self:center;border:0;background:none;font:inherit;font-size:12.5px;
+  color:var(--muted);padding:6px 0;text-decoration:underline;text-underline-offset:3px}
+
+/* 后台编辑弹窗：区号+号码并排、年+月并排，跨列字段整行铺开 */
+.reg-edit-box .pwd-form .reg-line{display:flex;gap:6px}
+
+.reg-edit-box .pwd-form .reg-line .reg-cc{flex:0 0 64px;text-align:center;padding-left:4px;padding-right:4px}
+
+.reg-edit-box .pwd-form .reg-line input,
+.reg-edit-box .pwd-form .reg-line select{flex:1 1 auto;min-width:0}
+
+.reg-edit-box .pwd-form .reg-span2{grid-column:1/-1}
+
+/* 弹窗底部的取消与保存并排放，避免多占一行把底部挤出弹窗可视区 */
+.reg-edit-box .pwd-form .reg-actions{grid-column:1/-1;display:flex;gap:10px}
+
+.reg-edit-box .pwd-form .reg-actions button{flex:1;padding:10px}
+
+/* ==================================================================
+   v74 · 背景音乐开关：深色圆底 + 音符，开启匀速旋转，关闭停止并变灰加斜杠
+   色值取自现有色板：圆底 --ink #0F3D43、开启音符 #FFF、关闭音符 #5B727A
+   ================================================================== */
+.bgm-btn{position:relative;width:34px;height:34px;padding:0;border:0;background:none;
+  flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent}
+
+.bgm-disc{width:34px;height:34px;border-radius:50%;background:#0F3D43;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.45);
+  display:flex;align-items:center;justify-content:center;
+  animation:bgmSpin 8s linear infinite}
+
+.bgm-disc svg{width:19px;height:19px;fill:#FFFFFF;display:block}
+
+.bgm-slash{position:absolute;left:50%;top:50%;width:26px;height:2px;
+  margin:-1px 0 0 -13px;background:#FFFFFF;border-radius:2px;
+  transform:rotate(-45deg);display:none}
+
+/* 停止用 paused 而非 none：停在当前角度，不跳变，再开启能接着转 */
+.bgm-btn.is-off .bgm-disc{animation-play-state:paused}
+
+.bgm-btn.is-off .bgm-disc svg{fill:#5B727A}
+
+.bgm-btn.is-off .bgm-slash{display:block}
+
+@keyframes bgmSpin{to{transform:rotate(360deg)}}
+
+@media(prefers-reduced-motion:reduce){.bgm-disc{animation:none}}
+
+/* 音乐开关固定在右上角：介绍页整屏无品牌条，开关不能跟着 header 一起被隐藏 */
+.bgm-btn{position:fixed;top:calc(11px + env(safe-area-inset-top,0px));right:14px;z-index:11}
+
+/* 品牌条右侧让出开关位置，避免会议名压到按钮 */
+.brand-bar{padding-right:56px}
+
+/* 会议名较长：窄屏省略而不是折行撑高品牌条 */
+.brand-main{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+
+/* 后台不需要背景音乐，开关一并隐藏 */
+body[data-route="admin"] .bgm-btn{display:none}
+
+.brand-bar{padding-right:52px}
+
+.brand-main{font-size:12.5px}
+
+/* ==================================================================
+   后台 · 背景音乐面板
+   ================================================================== */
+.bgm-admin{display:flex;flex-direction:column;gap:14px}
+
+.bgm-head{display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:12px 14px;border:1px solid #e3ebf1;border-radius:10px;background:#f8fbfc}
+
+.bgm-state{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--ink)}
+
+.bgm-dot{width:8px;height:8px;border-radius:50%;background:#c9d4dc;flex:0 0 auto}
+
+.bgm-dot.on{background:var(--teal);box-shadow:0 0 0 3px var(--teal-glow)}
+
+.bgm-meta p{margin:0;font-size:13px;line-height:1.8;color:#33414f}
+
+.bgm-meta b{color:var(--ink);font-weight:500}
+
+.bgm-meta .bgm-info{font-size:12px;color:#7c93a0}
+
+.bgm-ops{display:flex;flex-wrap:wrap;gap:8px}
+
+.bgm-upload{position:relative;display:inline-flex;align-items:center;justify-content:center;
+  padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px}
+
+.bgm-tip{margin:0;min-height:16px;font-size:12px;color:#8a97a0;line-height:1.6}
+
+/* 矮屏（≈667 及以下）：「返回上一步」是功能入口，优先保住它，
+   把「查看细分岗位」的辅助提示让出来（该说明在详述弹层里同样能看到） */
+@media (max-height:700px){
+  #view-signup #su-pane2 .help-hint{display:none}
+}
+
+/* ==================================================================
+   v89 · 活动页高屏（≥880px）填满
+   顶部会议名与日期已删，内容变少；这里把模块内部 padding 和字号同步放大，
+   让空间长在内容里，而不是被 space-between 堆成模块之间的断层。
+   矮屏不受影响（媒体查询外维持原 clamp 口径）。
+   ================================================================== */
+@media (min-height:880px){
+  #view-event .ev-nums{padding:26px 0}
+  #view-event .ev-nums b{font-size:31px}
+  #view-event .ev-nums b em{font-size:18px}
+  #view-event .ev-nums small{font-size:12px;margin-top:6px}
+  #view-event .ev-panel{padding:20px 16px 18px}
+  #view-event .ev-panel-t{font-size:14.5px;margin-bottom:12px}
+  #view-event .ev-blocks{gap:12px}
+  #view-event .ev-blocks div{padding:15px 13px}
+  #view-event .ev-blocks b{font-size:14px}
+  #view-event .ev-blocks span{margin-top:5px;line-height:1.5}
+  #view-event .ev-when{padding:8px 16px 16px}
+  #view-event .ev-row{padding:14px 0}
+  #view-event .ev-k{font-size:11.5px;margin-bottom:4px}
+  #view-event .ev-v{font-size:15px;line-height:1.5}
+  #view-event .ev-tl{padding:16px 0 4px;margin-top:10px}
+  #view-event .ev-tl-i b{font-size:14px;padding:0 11px}
+  #view-event .ev-tl-i span{font-size:12px;margin-top:8px}
+}
+
+/* ==================================================================
+   v92 · 高屏放大断点下移到 800（852 是主流机型，880 的断点根本触发不到），
+   并给 920+ 再补一档。目标：把模块间空隙压到 40—60px，而不是 119px。
+   ================================================================== */
+@media (min-height:800px){
+  #view-event .ev-nums{padding:26px 0}
+  #view-event .ev-nums b{font-size:31px}
+  #view-event .ev-nums b em{font-size:18px}
+  #view-event .ev-nums small{font-size:12px;margin-top:6px}
+  #view-event .ev-panel{padding:20px 16px 18px}
+  #view-event .ev-panel-t{font-size:14.5px;margin-bottom:12px}
+  #view-event .ev-blocks{gap:12px}
+  #view-event .ev-blocks div{padding:15px 13px}
+  #view-event .ev-blocks b{font-size:14px}
+  #view-event .ev-blocks span{margin-top:5px;line-height:1.5}
+  #view-event .ev-when{padding:8px 16px 16px}
+  #view-event .ev-row{padding:14px 0}
+  #view-event .ev-k{font-size:11.5px;margin-bottom:4px}
+  #view-event .ev-v{font-size:15px;line-height:1.5}
+  #view-event .ev-tl{padding:16px 0 4px;margin-top:10px}
+  #view-event .ev-tl-i b{font-size:14px;padding:0 11px}
+  #view-event .ev-tl-i span{font-size:12px;margin-top:8px}
+}
+
+@media (min-height:920px){
+  #view-event .ev-nums{padding:34px 0}
+  #view-event .ev-nums b{font-size:35px}
+  #view-event .ev-nums small{font-size:12.5px;margin-top:7px}
+  #view-event .ev-panel{padding:26px 18px 24px}
+  #view-event .ev-panel-t{font-size:15.5px;margin-bottom:16px}
+  #view-event .ev-blocks{gap:14px}
+  #view-event .ev-blocks div{padding:22px 15px}
+  #view-event .ev-blocks b{font-size:15px}
+  #view-event .ev-blocks span{margin-top:7px}
+  #view-event .ev-when{padding:12px 18px 20px}
+  #view-event .ev-row{padding:22px 0}
+  #view-event .ev-k{font-size:12px;margin-bottom:5px}
+  #view-event .ev-v{font-size:16.5px}
+  #view-event .ev-tl{padding:24px 0 6px;margin-top:14px}
+  #view-event .ev-tl-i b{font-size:15.5px;padding:0 12px}
+  #view-event .ev-tl-i span{font-size:12.5px;margin-top:10px}
+}
+
+@media (min-height:800px){
+  #view-event .ev-blocks.five div{padding:11px 12px}
+  #view-event .ev-blocks.five b{font-size:12.5px}
+}
+
+@media (min-height:920px){
+  #view-event .ev-blocks.five div{padding:14px 14px}
+  #view-event .ev-blocks.five b{font-size:13.5px}
+}
+
+/* v126：两页共用一个徽章尺度。原来 34px 是「小图标 + 竖排标题」时代的尺寸，
+   改成左右结构后图标是整块的门面，34 撑不住，放大到 48（对勾 24）。 */
+#view-success .ck-badge,#view-checkin .ck-badge{width:48px;height:48px;margin-bottom:4px}
+
+#view-success .ck-badge svg,#view-checkin .ck-badge svg{width:24px;height:24px}
+
+#view-success .ck-title,#view-checkin .ck-title{font-size:clamp(18px,2.4vh,22px)}
+
+/* 领卡首卡：主按钮级视觉重量 */
+.ck-gifts .cta-card:first-child{min-height:clamp(74px,10vh,92px);
+  background:linear-gradient(135deg,var(--teal-2),var(--blue));border:0;color:#fff;
+  box-shadow:0 6px 18px rgba(27,169,160,.24)}
+
+.ck-gifts .cta-card:first-child .cta-body b{font-size:clamp(16px,2.1vh,19px);color:#fff}
+
+.ck-gifts .cta-card:first-child .cta-body small{color:rgba(255,255,255,.9);line-height:1.45;font-size:clamp(11px,1.4vh,12.5px)}
+
+.ck-gifts .cta-card:first-child .cta-go{background:rgba(255,255,255,.22);color:#fff;border:0}
+
+.ck-gifts .cta-card:not(:first-child){opacity:.92}
+
+/* v100 修正：.ck-gifts 首个元素是标题 <p>，:first-child 选不中卡片，
+   改用相邻兄弟选择器命中标题后第一张卡 */
+.ck-gifts .ck-gifts-t + .cta-card{min-height:clamp(74px,10vh,92px);
+  background:linear-gradient(135deg,var(--teal-2),var(--blue));border:0;color:#fff;
+  box-shadow:0 6px 18px rgba(27,169,160,.24)}
+
+.ck-gifts .ck-gifts-t + .cta-card .cta-body b{font-size:clamp(16px,2.1vh,19px);color:#fff}
+
+.ck-gifts .ck-gifts-t + .cta-card .cta-body small{color:rgba(255,255,255,.92);line-height:1.45;font-size:clamp(11px,1.4vh,12.5px)}
+
+.ck-gifts .ck-gifts-t + .cta-card .cta-go{background:rgba(255,255,255,.22);color:#fff;border:0}
+
+/* ==================================================================
+   v103 · 首页按设计稿 1:1 复刻（替换 v94—v102 的弹性流式版）
+
+   坐标系：设计稿 941×1672（9:16），与背景图 bg-intro-v2.webp（750×1622，
+   居中裁 9:16 后与设计稿背景逐像素重合）同一套比例。
+
+   .intro-stage  宽 = max(视口宽, 视口高×0.46239)，aspect-ratio 750/1622，
+                 再居中裁切 → 背景永远铺满且不变形；视口越高露出的上下余量越多，
+                 越矮裁掉越多，即「以 9:16 为基准上下缩放」。
+   .intro-safe   stage 内 9:16 的基准区（上下各留 8.908%），设计稿全部内容落在
+                 这一层，位置一律用设计稿百分比，不随机型漂移。
+   --u           1 设计稿像素 = 100vw/941。全站字号/线宽/间距都乘它。
+
+   矮屏不再单独调字号：内容已按比例缩，物理高度不足时只会等比变小。
+   ================================================================== */
+.intro-screen{position:relative;display:block;width:100%;height:100vh;height:100dvh;
+  min-height:100vh;min-height:100dvh;overflow:hidden;background:var(--hero-bg)}
+
+.intro-stage{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:max(100vw,calc(100vh * 0.46239));
+  width:max(100vw,calc(100dvh * 0.46239));
+  aspect-ratio:750 / 1622}
+
+.intro-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;
+  animation:introPush 2600ms var(--ease) backwards}
+
+/* 9:16 基准区：stage 上下各裁 8.908% 后剩下的部分 */
+.intro-safe{position:absolute;left:0;right:0;top:8.908%;bottom:8.908%;
+  --u:calc(100vw / 941);font-size:calc(1px * var(--u))}
+
+/* —— 顶部两行抬头（容器铺满 safe，子元素才能用 safe 的百分比） —— */
+.intro-head{position:absolute;inset:0;pointer-events:none}
+
+.intro-line1{position:absolute;left:0;right:0;top:calc(179 / 1672 * 100%);
+  margin:calc(-16.2 * var(--u)) 0 0;
+  display:flex;align-items:center;justify-content:center;gap:calc(30 * var(--u));
+  font-size:calc(32.4 * var(--u));letter-spacing:calc(1.7 * var(--u));line-height:1;
+  color:#0b4a60;white-space:nowrap}
+
+.intro-line1 i{display:block;width:calc(42 * var(--u));height:calc(1.8 * var(--u));background:#44798a;flex:0 0 auto}
+
+.intro-line2{position:absolute;left:0;right:0;top:calc(229.5 / 1672 * 100%);
+  margin:calc(-16.5 * var(--u)) 0 0;text-align:center;white-space:nowrap;
+  font-size:calc(33 * var(--u));letter-spacing:calc(3 * var(--u));line-height:1;
+  color:#0b4a60}
+
+.intro-rule{position:absolute;left:50%;top:calc(275 / 1672 * 100%);
+  width:calc(74 * var(--u));height:calc(2.4 * var(--u));margin:0 0 0 calc(-37 * var(--u));
+  background:#2f7f8e;border-radius:1px}
+
+/* —— 主标语：纯文本两行（原书法字图已去品牌，改为文字排版） ——
+   基准：原字图实宽 620×279，按内容宽 727.6 折算，两行字高约 163/行。
+   现按 font-size 120u × line-height 1.06 排出等比块面，第二行右移 0.82em
+   复刻原稿的错落；left 10.74% = 原 49.4% 减 38.66% 的等效起点。 */
+.intro-wordmark{position:absolute;left:calc(101 / 941 * 100%);top:20.5%;
+  width:calc(727.6 / 941 * 100%);margin:0;
+  font-family:"Kaiti SC","STKaiti","KaiTi","Songti SC","Source Han Serif SC",serif;
+  font-weight:700;font-size:calc(130 * var(--u));line-height:1.06;
+  letter-spacing:-.02em;color:#1e8489;text-align:left}
+
+.intro-wordmark span{display:block}
+
+.intro-wordmark span + span{padding-left:.45em}
+
+/* 渐变字：不支持 background-clip 的浏览器回落到上面的纯色 */
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  .intro-wordmark span{background:linear-gradient(97deg,#0f6b78 0%,#23878c 52%,#5cbcb4 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+}
+
+/* —— 五行正文：左对齐（非居中），首行基线对齐设计稿 —— */
+.intro-desc{position:absolute;left:calc(198 / 941 * 100%);top:calc(646.75 / 1672 * 100%);
+  margin:0;white-space:nowrap;text-align:left;
+  font-family:"Songti SC","STSong","Source Han Serif SC","Noto Serif CJK SC",serif;
+  font-size:calc(29.5 * var(--u));line-height:1.576;
+  color:#253a44;letter-spacing:calc(0.3 * var(--u))}
+
+/* —— 落款：pin 图标 + 一行标语（原字图自带波浪笔触，现用渐变细线还原） —— */
+.intro-sign{position:absolute;inset:0;pointer-events:none}
+
+.intro-pin{position:absolute;left:calc(212 / 941 * 100%);top:52.6%;
+  width:calc(25 * var(--u));height:auto}
+
+/* 原字图 560×128、按 425.7 宽折算：字号 47u 与图上字等高，起点 top 54.5% */
+.intro-sign-text{position:absolute;left:calc(247 / 941 * 100%);top:54.5%;
+  margin:0;white-space:nowrap;
+  font-family:"Kaiti SC","STKaiti","KaiTi","Songti SC","Source Han Serif SC",serif;
+  font-weight:700;font-size:calc(47 * var(--u));line-height:1.15;
+  letter-spacing:.02em;color:#1e8489}
+
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  .intro-sign-text{background:linear-gradient(97deg,#0f6b78 0%,#2b8f93 58%,#63c3bb 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+}
+
+/* 波浪笔触：两条透明端点的渐变细线，还原原图的收笔感 */
+.intro-sign-text::after{content:"";display:block;height:calc(2.4 * var(--u));
+  margin-top:calc(14 * var(--u));border-radius:calc(2 * var(--u));
+  background:linear-gradient(90deg,rgba(99,195,187,0) 0%,#4fb3b0 24%,#63c3bb 56%,#8fd9c9 80%,rgba(143,217,201,0) 100%);
+  transform:rotate(-.4deg)}
+
+/* 设计稿的字压在纯白雾上，没有描边；旧版为压建筑加的白光在这里反而糊字 */
+.intro-desc,.intro-sign{text-shadow:none}
+
+/* 底部翻页不参照设计稿，沿用站内上滑提示：固定在视口底部，不参与 stage 缩放 */
+.intro-screen .swipe-hint{margin-top:0;
+  position:absolute;left:0;right:0;bottom:calc(clamp(14px,2.4vh,24px) + env(safe-area-inset-bottom));
+  width:auto;align-items:center;padding:0 22px}
+
+/* 平板竖屏 / PC（比 5:8 更宽）：再按宽度撑满就会把上下裁穿、抬头看不见。
+   这类屏改为按高度适配，左右由 var(--hero-bg) 兜底，保证内容整体在屏内。
+
+   v107 修正：原式让 stage 高 = 100dvh，但 9:16 基准区只占 stage 的 82.18%，
+   等于白白浪费上下各 9% —— PC 上 stage 只有 281px 宽，正文缩到 8px。
+   改成让「基准区」撑满视口：stage 高 = 100dvh / 0.82184 = 1.21679×，
+   宽 = 1.21679 × 0.46239 = 0.56263×，同样的窗口能多出 21% 的宽度。
+   注意：--u 必须跟着 stage 实际宽度走，否则字号按视口宽算、容器却只有 340 宽，
+   文字会整片溢出重叠 —— 这正是 PC 端截图的症状（见 js 里的 fitIntro）。 */
+@media (min-aspect-ratio:5/8){
+  .intro-stage{width:calc(100vh * 0.56263);width:calc(100dvh * 0.56263);
+    height:calc(100vh * 1.21679);height:calc(100dvh * 1.21679);aspect-ratio:auto}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .intro-bg{animation:none}
+}
+
+/* ==================================================================
+   v104 · 交互动效
+   只做三件事：引导视线、交代空间关系、给操作反馈。
+   不做常驻瞎动的东西——首页演完一次就静止，其余都是「进来时」和「按下时」。
+
+   节奏：0.18s 起，1.9s 收，缓动统一 cubic-bezier(.22,1,.36,1)。
+   v103 已把首页元素的定位从 transform 换成 top/margin，这里才敢用 transform 做动画。
+   ================================================================== */
+:root{--ease-back:cubic-bezier(.34,1.56,.64,1);--ease-soft:cubic-bezier(.4,0,.2,1)}
+
+@keyframes iUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+@keyframes iFade{from{opacity:0}to{opacity:1}}
+
+@keyframes iGrowL{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
+
+@keyframes iWipeUp{from{clip-path:inset(101% 0 0 0)}to{clip-path:inset(0 0 0 0)}}
+
+@keyframes iWipeRight{from{clip-path:inset(0 101% 0 0)}to{clip-path:inset(0 0 0 0)}}
+
+@keyframes iPop{0%{opacity:0;transform:scale(.3)}62%{opacity:1;transform:scale(1.14)}100%{opacity:1;transform:scale(1)}}
+
+@keyframes checkPop{from{opacity:0;transform:scale(.2)}to{opacity:1;transform:scale(1)}}
+
+/* 主标语：从略近处轻轻落定。不用 clip 擦除——两行错落，
+   自上而下擦会先露出第二行，阅读顺序是反的 */
+@keyframes iWord{from{opacity:0;transform:scale(1.045) translateY(12px)}
+  to{opacity:1;transform:scale(1) translateY(0)}}
+
+/* —— 1. 首页入场：按设计稿的阅读顺序落位 ——
+   横线从文字两端向外生长 → 抬头 → 短横线 → 主标语落定 → 正文逐行 → 落款擦入 → 上滑提示 */
+.intro-desc,.intro-sign{animation:none}
+
+/* 让位给下面的逐元素序列 */
+.intro-line1 i{transform-origin:right center;animation:iGrowL .58s .18s var(--ease) both}
+
+.intro-line1 i:last-child{transform-origin:left center;animation-delay:.24s}
+
+.intro-line1 span{display:inline-block;animation:iUp .62s .3s var(--ease) both}
+
+.intro-line2{animation:iUp .66s .4s var(--ease) both}
+
+.intro-rule{transform-origin:center;animation:iGrowL .5s .56s var(--ease) both}
+
+.intro-wordmark{animation:iWord .78s .62s var(--ease) both}
+
+.intro-desc span{display:block;animation:iUp .58s var(--ease) both}
+
+.intro-desc span:nth-child(1){animation-delay:1.12s}
+
+.intro-desc span:nth-child(2){animation-delay:1.19s}
+
+.intro-desc span:nth-child(3){animation-delay:1.26s}
+
+.intro-desc span:nth-child(4){animation-delay:1.33s}
+
+.intro-desc span:nth-child(5){animation-delay:1.40s}
+
+.intro-pin{animation:iPop .56s 1.5s var(--ease-back) both}
+
+.intro-sign-text{animation:iWipeRight .62s 1.56s var(--ease) both}
+
+.intro-screen .swipe-hint{animation:iUp .6s 1.82s var(--ease) both}
+
+/* 翻页：新页面上浮淡入；首页只淡入（它是整屏背景，位移会露出边）
+   fill-mode 不能用 both：both 会在动画结束后一直保留 to 帧的 transform，
+   浏览器把它算成 matrix(1,0,0,1,0,0) 而不是 none——非 none 的 transform 会让
+   这个 .view 变成 position:fixed 子元素的包含块（弹窗、原生的 select 弹层
+   都按它定位而不是按视口），这正是"点一下控件就跳位"的来源。
+   这里没有 delay，去掉 fill 即可：动画照常上浮，结束后 transform 自然回到 none。 */
+.view.active{animation:viewIn .34s var(--ease)}
+
+@keyframes viewIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.view-full.active{animation:iFade .36s ease}
+
+/* 跳数时数字等宽，否则 1000 从 9→10→100 会左右抖 */
+.ev-n{display:inline-block;min-width:1.2em;text-align:center;font-variant-numeric:tabular-nums}
+
+/* 选项选中：对勾弹出来，边框跟着亮（原来的变化是「瞬间切换」，缺一点确认感） */
+.gcell.on::after{animation:checkPop .32s var(--ease-back) both}
+
+/* 表单聚焦：光晕浮起，而不是硬切边框 */
+.form input:not([type=checkbox]):not([type=radio]),.form select,.form textarea,
+.fld input,.fld select{
+  transition:border-color .2s var(--ease-soft),box-shadow .24s var(--ease-soft),background .2s}
+
+.form input:focus,.form select:focus,.form textarea:focus,
+.fld input:focus,.fld select:focus{
+  box-shadow:0 0 0 3px rgba(27,169,160,.12)}
+
+/* 两步流程：进度条走位与步骤文案同步 */
+.steps .step-bar i{transition:width .55s var(--ease)}
+
+.steps .step-txt b{transition:color .3s}
+
+/* —— 5. 收尾：系统开了「减弱动态效果」就全部停掉，包括循环动画 —— */
+@media (prefers-reduced-motion:reduce){
+  .intro-line1 i,.intro-line1 span,.intro-line2,.intro-rule,.intro-wordmark,
+  .intro-desc span,.intro-pin,.intro-sign-text,.intro-screen .swipe-hint,
+  .view.active,.view-full.active,
+  #view-event.active .ev-blocks div,#view-event.active .ev-tl::before,
+  #view-event.active .ev-tl-i::before,#view-event.active .ev-tl-i b,
+  #view-event.active .ev-tl-i span,.gcell.on::after{
+    animation:none!important}
+}
+
+/* —— 6. 首页「推得动」的手感 ——
+   手指上滑时整屏跟着走一段（最多 46px），松手回弹或翻页。
+   位移刻意做小：目的是让手指有回应，不是真把页面拖走。 */
+.intro-screen{transition:transform .32s var(--ease-back),opacity .32s var(--ease-soft)}
+
+.intro-screen.dragging{transition:none}
+
+/* 入场推镜收尾后接一段极缓呼吸：18s 周期、1.6% 幅度，察觉不到但画面不死 */
+.intro-bg{will-change:transform;
+  animation:introPush 2600ms var(--ease) backwards, introBreath 18s 2.6s ease-in-out infinite}
+
+@keyframes introBreath{0%,100%{transform:scale(1)}50%{transform:scale(1.016)}}
+
+/* 选项按下 / 选中的手感：先缩一下再弹回，配合对勾弹出 */
+.gcell{transition:transform .18s var(--ease-soft),filter .16s var(--ease-soft),
+  box-shadow .22s var(--ease-soft),background-color .22s var(--ease-soft),
+  border-color .22s var(--ease-soft),color .22s var(--ease-soft)}
+
+.gcell:active{transform:scale(.955)}
+
+.gcell.on{animation:cellPop .3s var(--ease-back)}
+
+@keyframes cellPop{0%{transform:scale(.94)}62%{transform:scale(1.018)}100%{transform:scale(1)}}
+
+@media (prefers-reduced-motion:reduce){
+  .intro-bg{animation:introPush 2600ms var(--ease) backwards}
+  .intro-screen{transition:none}
+  .gcell.on{animation:none}
+}
+
+/* 首页拖动时整屏会上移几十像素，底部露出的必须是同一种青白，
+   否则会显出一条「页面被拽走了」的白边。 */
+body[data-route="intro"]{background:var(--hero-bg)}
+
+/* 上滑缩小时四周露出的底：同图虚化，铺得比 stage 大一圈，边缘不留缝 */
+.intro-bg-blur{position:absolute;left:-8%;top:-8%;width:116%;height:116%;
+  object-fit:cover;filter:blur(16px);transform:scale(1)}
+
+/* —— 7. 结果页徽章：先弹出来，再让对勾「画」上去，最后光环散开一次 ——
+   报名成功、现场签到都是这一套，两页共用动效，不给用户两套语言。 */
+.view.active .ck-badge{position:relative;animation:badgePop .58s .08s var(--ease-back) both}
+
+@keyframes badgePop{0%{opacity:0;transform:scale(.42)}62%{opacity:1;transform:scale(1.12)}
+  100%{opacity:1;transform:scale(1)}}
+
+.view.active .ck-badge::after{content:"";position:absolute;inset:0;border-radius:50%;
+  border:2px solid rgba(27,169,160,.55);animation:badgeRing 1.15s .5s var(--ease-soft) both}
+
+@keyframes badgeRing{from{opacity:.85;transform:scale(.88)}to{opacity:0;transform:scale(1.95)}}
+
+.view.active .ck-badge svg path{stroke-dasharray:26;stroke-dashoffset:26;
+  animation:tickDraw .46s .44s var(--ease-soft) both}
+
+@keyframes tickDraw{to{stroke-dashoffset:0}}
+
+@media (prefers-reduced-motion:reduce){
+  .view.active .ck-badge,.view.active .ck-badge::after,.view.active .ck-badge svg path{animation:none!important}
+  .view.active .ck-badge svg path{stroke-dashoffset:0}
+}
+
+@media (min-height:800px){
+  #view-event .ev-blocks.five div{padding:11px 0}
+  #view-event .ev-blocks.five b{font-size:13.5px}
+}
+
+@media (min-height:920px){
+  #view-event .ev-blocks.five div{padding:15px 0}
+  #view-event .ev-blocks.five b{font-size:14px}
+}
+
+/* 375×667 这类矮屏：五块纵向排下来比原来 2+2+1 多占一行，时间轴会掉到按钮下面。
+   这里只压内边距和行距，不缩字号——矮屏上字再小就更难读了。 */
+@media (max-height:700px){
+  #view-event .ev-nums{padding:10px 0}
+  #view-event .ev-blocks.five div{padding:6px 0}
+  #view-event .ev-panel{padding:11px 14px 9px}
+  #view-event .ev-row{padding:10px 0}
+  #view-event .ev-tl{padding:16px 0 0;margin-top:4px}
+}
+
+/* ==================================================================
+   v107 · PC / 宽屏收尾
+   1) 竖幅两侧各留 370px 空白，边缘一刀切太硬，给它一层外投影，像一张浮起的海报
+   2) 舞台比视口高、上下被裁，视口底部落在设计稿的水面上；
+      而上滑提示是相对视口定位的，深青字压深绿水就糊了 → 换成白色胶囊底
+   ================================================================== */
+@media (min-aspect-ratio:5/8){
+  .intro-stage{box-shadow:0 0 0 1px rgba(15,90,102,.05),0 24px 80px rgba(15,90,102,.16)}
+  /* 居中不能用 translateX：入场动画 iUp 的 fill-mode:both 会把 transform 锁成 none，
+     位移会被吃掉、整块偏到右边去。用 left/right:0 + width:fit-content + margin:auto。 */
+  .intro-screen .swipe-hint{left:0;right:0;margin:0 auto;width:fit-content;
+    padding:10px 24px 9px;border-radius:24px;
+    background:rgba(255,255,255,.82);backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    box-shadow:0 2px 12px rgba(15,90,102,.10);
+    bottom:calc(clamp(14px,2.4vh,24px) + env(safe-area-inset-bottom))}
+  .intro-screen .swipe-text{color:#146b73;font-size:13px}
+}
+
+/* 音乐开关是 fixed 到视口的，PC 上会甩到屏幕最右边、和中间的内容脱节。
+   两套内容宽度：首页是随窗口高变化的竖幅，其余页面固定 480。 */
+@media (min-width:560px){
+  body:not([data-route="intro"]) .bgm-btn{right:max(14px,calc((100vw - 480px) / 2 + 14px))}
+}
+
+@media (min-aspect-ratio:5/8){
+  body[data-route="intro"] .bgm-btn{right:calc((100vw - 100dvh * 0.56263) / 2 + 10px)}
+}
+
+/* PC 上没有「上滑」这回事，鼠标用户看到三个字会愣一下。
+   文案用伪元素换掉，DOM 里的原文保留给读屏软件。 */
+@media (min-aspect-ratio:5/8){
+  .intro-screen .swipe-text{font-size:0}
+  .intro-screen .swipe-text::before{content:"点击查看活动详情及报名方式";font-size:13px;
+    letter-spacing:.4px}
+}
+
+@media (max-height:700px){
+  /* 667 屏上三块刚好填满，段落间只剩 12px；从数字条和面板标题里各抠一点，补到 20 上下 */
+  #view-event .ev-nums{padding:2px 0 0}
+  #view-event .ev-panel-t{margin-bottom:7px}
+  #view-event .ev-blocks.five{gap:6px}
+  #view-event .ev-blocks.five div{padding:8px 10px 9px}
+  #view-event .ev-blocks.five b{font-size:12.5px}
+  #view-event .ev-blocks.five span{margin-top:3px}
+  #view-event .ev-blocks.five div>i{font-size:19px;top:3px}
+  #view-event .ev-nums b{font-size:28px}
+  #view-event .ev-panel{padding:11px 12px}
+}
+
+@media (min-height:880px){
+  #view-event .ev-blocks.five{gap:10px}
+  #view-event .ev-blocks.five div{padding:12px 12px 13px}
+  #view-event .ev-blocks.five b{font-size:13.5px}
+  #view-event .ev-blocks.five span{margin-top:5px}
+  #view-event .ev-nums{padding:12px 0}
+}
+
+/* 一屏：两行正文比 v108 的一行多出约 42px，从数字条、面板内距、
+   时间轴里抠回来，不动字号（矮屏再缩字就看不清了）。 */
+@media (max-height:700px){
+  /* 667 屏：01—04 各两行正文、05 三行，合计比 v108 多约 44px。
+     压内距和行距，字号只降 0.5px —— 正文 11px 已是手机上可读的下限。 */
+  /* v106 写的 #view-event.active .ev-nums 是 (1,2,0)，比 #view-event .ev-nums
+     高一档，不加 .active 前缀这里改 margin 不生效 —— 之前三块贴一起就是这个坑 */
+  #view-event.active .ev-nums,#view-event.active .ev-panel{margin-bottom:8px}
+  /* padding-bottom 也要带 .active 前缀：#view-event.active 那条是 clamp(9,1.7vh,16)，
+     667 屏算出来 11.34px，比这里写的 5px 优先级高 */
+  #view-event.active .ev-nums{padding-bottom:5px}
+  #view-event .ev-nums{padding:5px 0}
+  #view-event .ev-nums b{font-size:28px}
+  #view-event .ev-nums small{margin-top:4px;font-size:11px}
+  #view-event .ev-panel{padding:7px 10px 8px}
+  #view-event .ev-panel-t{margin:0 0 5px}
+  #view-event .ev-blocks.five{gap:6px}
+  /* v108 用 grid-auto-rows:1fr 拉齐三行，结果 01—04 被 05 撑到 78px。
+     同一 grid 行内的项默认 stretch，本来就等高，改成 auto 后
+     01/02、03/04 各自按内容（65px）收，05 单独一行（76px），省 29px。 */
+  #view-event .ev-blocks.five{grid-auto-rows:auto}
+  #view-event .ev-blocks.five div{padding:6px 9px 7px}
+  #view-event .ev-blocks.five div>i{font-size:26px;left:0;letter-spacing:-1.2px}
+  #view-event .ev-blocks.five b{padding-left:38px;font-size:12.5px;line-height:1.38}
+  #view-event .ev-blocks.five span{line-height:1.4;margin-top:2px}
+  /* 时间卡 198px 是最大一块水分：两行各压 3px 内距、时间轴压 6px 上距 */
+  #view-event .ev-when{padding:8px 11px 6px}
+  #view-event .ev-row{padding:2px 0}
+  #view-event .ev-tl{padding-top:7px;margin-top:2px}
+  #view-event .actions{padding-top:6px}
+  #view-event .btn-primary{padding-top:11px;padding-bottom:11px}
+}
+
+@media (min-height:880px){
+  /* 高屏（440×956 起）：space-between 会把余量摊成模块之间三个大洞。
+     与其留洞，不如把余量还给卡片本身 —— 卡片长高、字号提一档，
+     模块间距自然被压到 20px 上下，读起来更整。 */
+  #view-event .ev-blocks.five div{padding:16px 13px 17px}
+  #view-event .ev-blocks.five div>i{font-size:36px;left:2px;letter-spacing:-2px}
+  #view-event .ev-blocks.five b{padding-left:50px;font-size:14px}
+  #view-event .ev-blocks.five span{margin-top:5px;line-height:1.45}
+  #view-event .ev-nums{padding:12px 0}
+  #view-event .ev-nums b{font-size:31px}
+  #view-event .ev-when{padding:10px 16px 12px}
+  #view-event .ev-row{padding:14px 0}
+}
+
+/* 电脑端微信常见窗口（480×800、1024×768）：宽度够、高度矮。
+   正文在这里一行就放得下，卡片并不高，溢出的是时间卡 ——
+   min-height:800 那档把 .ev-row 内距给到 14px、四行就是 56px。
+   只压内距不动字号，480 宽上正文仍按 11.5px 显示。 */
+@media (min-width:420px) and (max-height:840px){
+  #view-event .ev-row{padding:6px 0}
+  #view-event .ev-when{padding:6px 14px 6px}
+  #view-event .ev-blocks.five div{padding:9px 11px 10px}
+  #view-event .actions{padding-top:6px}
+}
+
+/* 高屏第二段：只把余量还给卡片还不够，模块之间仍有 90px 的洞。
+   这里让面板吃掉余量（flex:1），三行卡片按 1fr 平分面板高度，
+   卡片内容垂直居中 —— 洞变成卡片内均匀的留白，整页是一摞等距的卡，
+   而不是三块被甩开的内容。只在 ≥880 生效，矮屏走上面的紧凑档。 */
+@media (min-height:880px){
+  #view-event.active .ev-panel{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+  #view-event.active .ev-blocks.five{flex:1 1 auto;min-height:0;grid-auto-rows:1fr;gap:9px}
+  /* 内容不能垂直居中：序号是 absolute 定位在左上角的，内容一居中，
+     正文就跑到数字头上了（试过，直接糊成一团）。这里只让卡片变高，
+     内容仍从顶部起排，多出来的高度沉在卡底当内距。 */
+}
+
+@media (max-height:700px){
+  #view-event .ev-blocks.five span{white-space:nowrap}
+}
+
+/* 360 这类 130px 内容宽的屏，11px 放不下 12 字，降到 10.5 保住一行 */
+@media (max-width:365px){
+  #view-event .ev-blocks.five span{letter-spacing:-.1px}
+  #view-event .ev-blocks.five b{font-size:12px}
+}
+
+/* 数字卡与按钮各收一档 */
+@media (max-height:700px){
+  #view-event.active .ev-nums{padding-bottom:4px}
+  #view-event .ev-nums{padding:4px 0}
+  #view-event .ev-nums b{font-size:26px}
+  #view-event .ev-nums small{margin-top:2px}
+  #view-event .ev-blocks.five div{padding:5px 9px 6px}
+  #view-event .btn-primary{padding-top:10px;padding-bottom:10px}
+  #view-event .ev-row{padding:0}
+  #view-event .ev-when{padding:4px 11px 3px}
+  #view-event .ev-tl{padding-top:2px}
+}
+
+/* 矮屏（≤700）：只降 0.5px，内距保住 4px 梯度 */
+@media (max-height:700px){
+  #view-event .ev-blocks.five div{padding:8px 10px 9px}
+  #view-event .ev-blocks.five b{font-size:12.5px}
+  #view-event .ev-blocks.five span{margin-top:4px}
+  #view-event .ev-blocks.five{gap:7px}
+  #view-event .ev-panel{padding:11px 12px 12px}
+  #view-event .ev-panel-t{margin:0 0 8px}
+}
+
+/* 高屏（≥880）：再放一档 */
+@media (min-height:880px){
+  #view-event .ev-blocks.five div{padding:13px 13px 14px}
+  #view-event .ev-blocks.five b{font-size:13.5px}
+  #view-event .ev-blocks.five span{margin-top:5px}
+  #view-event .ev-panel{padding:16px 16px 17px}
+  #view-event .ev-panel-t{margin:0 0 12px;font-size:12.5px}
+}
+
+/* 360×640（老安卓）：整体再收一档，只压内距不缩字号 */
+@media (max-width:365px){
+  #view-event .ev-nums{padding:3px 0}
+  #view-event .ev-nums small{margin-top:2px}
+  #view-event .ev-panel{padding:8px 10px 9px}
+  #view-event .ev-panel-t{margin:0 0 5px}
+  #view-event .ev-blocks.five{gap:6px}
+  #view-event .ev-blocks.five div{padding:6px 9px 7px}
+  #view-event .ev-row{padding:0}
+  #view-event .ev-tl{padding-top:0}
+  #view-event .ev-when{padding:4px 10px 4px}
+}
+
+/* ==================================================================
+   v112 · 首页纵向节奏（按 11-16 标注图的三条基准线）
+   标注图给的是三个元素的「上沿」目标：抬头往上提、落款往下沉，
+   中间正文用行距把气口拉开。设计稿 941×1672 坐标下：
+     抬头 179 / 229.5 / 275 → 160 / 210.5 / 256（上移 19 ≈ 1.1% safe 高）
+     正文 top 不动，行高 1.576 → 1.72（五行从 97px 到 106px，字更透气）
+     落款 54.4% / 56.30% → 57.4% / 59.3%（下移 2.9% ≈ 20px）
+   这样三段间距是「27 / 47 / 37」，比原来的「19 / 36 / 17」匀，也不再挤。
+   ================================================================== */
+.intro-line1{top:calc(160 / 1672 * 100%)}
+
+.intro-line2{top:calc(210.5 / 1672 * 100%)}
+
+.intro-rule{top:calc(256 / 1672 * 100%)}
+
+.intro-desc{line-height:1.72}
+
+.intro-pin{top:55.6%}
+
+.intro-sign-text{top:57.5%}
+
+/* v112 第二稿：以微信内可视区为基准重算（截图里页面从导航栏下方开始，
+   所以图片坐标要减掉 44px 导航）。三条线折算到 393×852 是 90 / 186 / 491，
+   对应抬头 142→90、书法 220→186、落款 476→491。
+   四块落位后间距是 36 / 35 / 38，视觉上等距。 */
+.intro-line1{top:calc(33 / 1672 * 100%)}
+
+.intro-line2{top:calc(86.5 / 1672 * 100%)}
+
+.intro-rule{top:calc(132 / 1672 * 100%)}
+
+.intro-wordmark{top:14.9%}
+
+.intro-pin{top:57.5%}
+
+.intro-sign-text{top:59.4%}
+
+/* 落款再沉 10px：三段间距从 31/31/23 收成 31/31/31 */
+.intro-pin{top:58.9%}
+
+.intro-sign-text{top:60.8%}
+
+/* 矮屏（16:9，如 375×667）：stage 高 811 > 视口 667，上下被裁掉，9:16 基准区
+   正好铺满视口 —— 基准区顶就是屏幕顶，抬头按 2% 摆会直接贴边。
+   这类屏沿用设计稿原位（抬头 71px），只把正文行距放到 1.62、落款微沉，
+   保证正文与落款之间还有 10px 气口。 */
+@media (max-height:700px){
+  .intro-line1{top:calc(179 / 1672 * 100%)}
+  .intro-line2{top:calc(229.5 / 1672 * 100%)}
+  .intro-rule{top:calc(275 / 1672 * 100%)}
+  .intro-wordmark{top:19.8%}
+  .intro-desc{line-height:1.62}
+  .intro-pin{top:54.8%}
+  .intro-sign-text{top:56.6%}
+}
+
+/* 宽屏（PC 微信、平板）：stage 按高度撑满，9:16 基准区顶就在屏幕顶（甚至 -27px），
+   抬头按 2% 摆会直接被裁出屏幕。这类屏同样回到设计稿原位与原行距。 */
+@media (min-width:470px){
+  .intro-line1{top:calc(179 / 1672 * 100%)}
+  .intro-line2{top:calc(229.5 / 1672 * 100%)}
+  .intro-rule{top:calc(275 / 1672 * 100%)}
+  .intro-wordmark{top:19.8%}
+  .intro-desc{line-height:1.576}
+  .intro-pin{top:52.6%}
+  .intro-sign-text{top:54.5%}
+}
+
+@media (max-height:700px){
+  #view-event .ev-blocks.five b{padding-left:38px}
+}
+
+@media (min-width:470px){
+}
+
+@media (max-height:700px){
+}
+
+
+/* ==================================================================
+   五大板块正文：窄屏收字号（放在文件最末，压住前面按高度调的所有字号）
+   分档：>400 走基础 11.5px，≤400 收 11px，≤365 收 10.5px。
+   只调字号不动布局——行数仍由卡片宽度决定，见 MEMORY 里对单列方案的讨论。
+   ================================================================== */
+@media (max-width:400px){
+  #view-event .ev-blocks span,.ev-blocks span{font-size:11px}
+}
+
+@media (max-width:365px){
+  #view-event .ev-blocks span,.ev-blocks span{font-size:10.5px}
+}
+
+/* 矮屏（375×667 那档）必须守住 10px：整页要靠它才塞得进一屏，
+   上面两条宽度断点会把 11px 带上矮屏，这里压回原值。 */
+@media (max-height:700px){
+  #view-event .ev-blocks span,.ev-blocks span{font-size:10px}
+}
+
+/* ========== 草稿态提示条（P3-c 发布闸门） ==========
+   草稿态不拦访问——运营要在发布前把报名、签到、导出都测一遍。
+   防护降级为「说清楚」：一条常驻提示，让拿到链接的人知道这不是正式活动。
+   正式数据隔离靠发布时的归档，不靠这个条。 */
+#draft-badge{position:fixed;left:0;right:0;top:0;z-index:9997;height:28px;line-height:28px;
+  padding:0 12px;background:#fff4e5;color:#8a5300;font-size:11.5px;text-align:center;
+  border-bottom:1px solid #ffe2bd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* 提示条是 fixed，不在流里，它压住的那 28px 由「被压的元素自己让出来」。
+   别改成给 body/#app 加 padding-top：品牌条是 sticky，一旦外层有了内边距，
+   sticky 的偏移会被算两次（实测品牌条落到 56px，中间空出一条 28px 的白带）。
+   → 有品牌条的页面：把它的 padding-top 从 12 加厚到 40。品牌条自带渐变底，
+     让出来的那一条正好被黄色提示条盖住，看着就是「提示条长在品牌条上」。
+   → 没有品牌条的页面分两种：
+     控制台（admin）是「整屏锁定 + 自己的头部」，必须让出 28px，否则工具栏被盖住；
+     它本身 height:100vh + border-box，加 padding 正好从内容区扣掉，不会溢出。
+     介绍页（intro）不让——一加就把 100dvh 的舞台顶出 28px 的滚动，
+     而它顶部被盖住的只是插画留白，没有可点的东西。 */
+body.has-draft-badge{--brand-h:74px}
+body.has-draft-badge .brand-bar{padding-top:40px}
+body.has-draft-badge[data-route="admin"] #app{padding-top:28px}
+body.has-draft-badge .bgm-btn{top:calc(39px + env(safe-area-inset-top,0px))}
+
+/* --brand-h 与品牌条加厚必须同步：报名页是「视口高度 - 品牌条高」的锁屏布局，
+   品牌条长高 28px 而 --brand-h 没跟上，整页就被顶出一条 26px 的滚动，尾栏出屏。 */
+
+/* P5 CTA 补充入口：静态文档流、可关闭感强（不用 fixed/absolute），
+   满足合规「不得用浮层遮挡主内容」。放在内容末尾、不覆盖表单与主 CTA。 */
+.cta-extra{display:none;flex-wrap:wrap;gap:8px;justify-content:center;
+  padding:4px 16px 18px;margin-top:8px}
+.cta-extra-item{display:inline-flex;align-items:center;justify-content:center;min-height:38px;
+  padding:8px 16px;border:1px solid var(--line);border-radius:19px;background:var(--surface-soft);
+  color:var(--teal-d);font-size:13px;text-decoration:none;max-width:100%}
+.cta-extra-item:active{background:var(--accent-soft)}
+
+/* P6 自助查询 / 展位 / 座位 */
+.q-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.q-head h2{margin:0;font-size:var(--fs-2);color:var(--ink)}
+.q-back{padding:6px 12px;font-size:13px}
+.q-tabs{display:flex;gap:6px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+.q-tab{flex:1;padding:10px 4px;border:0;border-bottom:2px solid transparent;background:none;
+  font-size:13px;color:var(--muted);cursor:pointer;white-space:nowrap}
+.q-tab.on{color:var(--teal-d);border-bottom-color:var(--teal);font-weight:600}
+.q-panel{display:none}
+.q-panel.on{display:block}
+.q-tip{font-size:12.5px;color:var(--muted);line-height:1.7;margin:0 0 12px}
+.q-form label{display:block;font-size:13px;color:var(--ink);margin-bottom:10px}
+.q-form input{display:block;width:100%;margin-top:5px;font:inherit;font-size:14px;
+  padding:10px;border:1px solid var(--line);border-radius:9px;color:var(--ink)}
+.q-result{margin-top:14px;min-height:24px;padding:12px;border-radius:10px;
+  background:var(--surface-soft);font-size:14px;color:var(--teal-d);line-height:1.6}
+.q-search{width:100%;font:inherit;font-size:14px;padding:10px 12px;margin-bottom:12px;
+  border:1px solid var(--line);border-radius:9px;color:var(--ink);background:#fff}
+.q-empty{padding:20px 8px;text-align:center;font-size:13px;color:var(--muted)}
+.q-item{padding:12px 14px;margin-bottom:8px;border:1px solid var(--line);
+  border-radius:11px;background:var(--surface-soft)}
+.q-item-h{display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--ink)}
+.q-item-h b{color:var(--teal-d);font-family:ui-monospace,Menlo,monospace}
+.q-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.q-tag{font-size:11.5px;color:var(--body);background:var(--accent-soft);
+  border-radius:10px;padding:3px 9px}
+.q-item-f{margin-top:7px;font-size:12px;color:var(--muted)}
+.q-seat{padding:9px 12px;margin-bottom:6px;border:1px solid var(--line);
+  border-radius:9px;font-size:13px;color:var(--body)}
+.query-entry{display:block;margin:10px auto;padding:8px 18px;border:1px solid var(--line);
+  border-radius:18px;background:var(--surface-soft);color:var(--teal-d);font-size:12.5px;cursor:pointer}

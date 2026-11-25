@@ -1,0 +1,354 @@
+/* checkin.css · 签到流：现场扫码签到(checkin) → 状态页(status)。
+ * 由 main.css 机械切分（第一刀）。规则顺序与原文件一致，未重排、未改写声明。
+ * 归位依据：#view-* 前缀 / 页面私有 id（index.html 视图边界）/ .ad-* 前缀。
+ */
+#checkin-state{text-align:center;margin:20px 0}
+
+/* ---- 签到结果卡（签到页专用）：状态、现场节奏、三份领取同卡展开 ---- */
+/* 内容不足一屏时从顶部起排（不悬在正中），超过一屏时按普通文档流滚动 */
+#view-checkin.active{display:flex;flex-direction:column;justify-content:flex-start;
+  min-height:calc(100vh - 44px);min-height:calc(100dvh - 44px);padding:var(--sp-4) var(--sp-2) max(var(--sp-3), calc(var(--sp-2) + env(safe-area-inset-bottom)))}
+
+#view-checkin .foot{margin-top:16px}
+
+#view-checkin .ck-title{font-size:var(--fs-2);color:var(--ink);margin:0 0 3px;line-height:1.3}
+
+#view-checkin .ck-title-sm{font-size:var(--fs-3);margin:0 0 8px}
+
+/* ---- 状态页：徽章与标题已并入 .ck-head（见文件末尾 v127 段） ---- */
+#view-status h2{text-align:center;font-size:22px;margin:0 0 6px;color:var(--ink)}
+
+#status-detail{font-size:13px;text-align:left;background:#f7f9fb;color:#4a6570;line-height:1.75}
+
+/* 5) 签到页状态切换：innerHTML 换内容时新块自动淡入，消除硬闪 */
+#checkin-state>*{animation:ckIn .24s var(--ease) backwards}
+
+/* 内容不足一屏时，页脚贴底，下半屏不空一块白 */
+#view-status.active{display:flex;flex-direction:column;justify-content:flex-start;
+  min-height:calc(100vh - 44px);min-height:calc(100dvh - 44px)}
+
+/* v127：状态页也套上卡片外壳 —— 与签到成功页同一套视觉语言。
+   卡片自己撑满剩余高度，内部余量再交给领卡区，页面底部不会留空洞。 */
+/* 卡片按内容定高、上下 auto 居中：状态页内容量比签到页少（没有到场人数那行），
+   硬撑满会让空白全压在卡片底部。居中之后空白分成上下两段，读起来是「留白」而不是「没填满」。
+   空间不足时 auto 退化为 0，不会裁掉内容。 */
+#view-status .ck-card-status{flex:0 0 auto;display:flex;flex-direction:column;
+  min-height:0;margin:auto 0;padding:clamp(12px,2vh,17px) 14px 14px}
+
+#view-status.active .foot{margin-top:auto;padding:18px 0 calc(env(safe-area-inset-bottom) + 14px)}
+
+/* ==================================================================
+   签到页：整页撑满一屏，落款吸底
+   原状态是「卡片顶在最上面 + 落款紧跟卡片 + 下半屏全空」，
+   改法是不给页面留空洞——空出来的高度分给卡片内部，而不是丢在底部。
+   ================================================================== */
+#view-checkin.active{justify-content:flex-start;padding:var(--sp-4) var(--sp-2) 0}
+
+#checkin-state{flex:1;display:flex;flex-direction:column;min-height:0}
+
+#view-checkin .foot{margin-top:auto;padding:18px 0 calc(env(safe-area-inset-bottom) + 14px)}
+
+/* 内容少的签到态（未报名 / 闸门未开 / 已报名未签）：卡片垂直居中，不堆在顶部 */
+#checkin-state > .ck-card{margin-top:auto;margin-bottom:auto}
+
+/* 签到成功：卡片撑满剩余高度。头部与时间轴按内容定高，
+   余量统一交给领卡区（见文件末尾 v126 段） */
+#checkin-state > .ck-card-done{flex:1;margin:0;display:flex;flex-direction:column;
+  padding:clamp(12px,2vh,17px) 14px 14px}
+
+/* v126：时间轴改成定高、不再抢余量。原来它靠 margin-top:auto 吸收上半个
+   空白，结果时间戳到时间轴之间空出 98px —— 余量应该给领卡，不是给它 */
+#checkin-state > .ck-card-done .ck-flow,
+#view-status #status-flow{padding:clamp(11px,1.9vh,17px) 6px;
+  background:#f8fbfc;border:0;border-radius:12px}
+
+/* 时间轴与福利区连成下半区：空白合并成头部下方的一段，不再劈成两块 */
+#checkin-state > .ck-card-done .ck-flow + .ck-gifts{margin-top:16px}
+
+#checkin-state > .ck-card-done .ck-gifts .cta-card{min-height:74px;padding:12px 14px 12px 13px}
+
+#checkin-state > .ck-card-done .ck-gifts .cta-body b{font-size:14px}
+
+#checkin-state > .ck-card-done .ck-gifts .cta-body small{font-size:11.5px}
+
+/* 状态页：头部改左右结构后不再整块垂直居中 —— 内容自上而下排，
+   余量交给领卡区。原来靠 margin-top:auto 把整块压在页面中间，
+   上方空一大片、领卡却挤在底部。 */
+#view-status.active #status-actions{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
+
+#view-status .ok-badge{width:48px;height:48px;margin:0}
+
+#view-status h2{font-size:clamp(19px,2.5vh,23px)}
+
+/* 状态页领卡区占比：给足上下空间 */
+#view-status .ck-gifts{margin-top:clamp(14px,2.4vh,24px)}
+
+
+
+/* ==================================================================
+   v126 · 签到成功页：头部左右结构 + 余量全部让给领卡
+
+   改前：头部是「图标 / 标题 / 副题 / 时间」四段竖排居中，两处
+   margin-top:auto 把余量吸收在卡顶（60px）和时间戳下方（98px），
+   而领卡主卡只有 80px —— 空白全给在没内容的地方，最该重的领卡反而不重。
+
+   改后：① 头部左右并排、图标 48、三行文案在自家块内居中；
+        ② 时间轴定高，余量交给领卡区，三张卡按 2:1:1 吸收。
+   ================================================================== */
+
+/* ① 头部：图标左、文案右，整体在卡片内水平居中。
+   尺寸全部走 dvh —— 这页在 844 上有 673px 可用高度，字号若写死，
+   卡片就会「很高但内容很小」，一眼看过去是空的。等比放大之后，
+   高度涨、内容也跟着涨，才是用户说的「按比例铺满」。 */
+.ck-head{flex:0 0 auto;display:flex;align-items:center;
+  justify-content:center;gap:clamp(11px,1.7dvh,15px);margin:0 0 4px}
+
+.ck-head .ck-badge{flex:0 0 auto;
+  width:clamp(44px,5.8dvh,56px);height:clamp(44px,5.8dvh,56px);margin:0}
+
+.ck-head .ck-badge svg{width:clamp(22px,2.9dvh,28px);height:clamp(22px,2.9dvh,28px)}
+
+.ck-head-txt{flex:0 1 auto;min-width:0;text-align:center}
+
+/* 三行层次：主标题 / 副题（青绿）/ 时间（灰）。
+   字距只加在主标题上——小字加字距会散。 */
+/* 必须带 id 前缀：本文件第 14 行有 `#view-checkin .ck-title`（id+class），
+   只写 `.ck-head .ck-title` 特异性不够，签到页会退回旧的固定字号，
+   与状态页的 clamp 对不上。 */
+#view-checkin .ck-head .ck-title,
+#view-status .ck-head .ck-title{font-size:clamp(21px,2.75dvh,26px);
+  line-height:1.16;letter-spacing:.6px;margin:0;text-align:center}
+
+.ck-head .ck-sub{margin:clamp(3px,.6dvh,6px) 0 0;
+  font-size:clamp(12px,1.55dvh,14.5px);line-height:1.3;letter-spacing:.8px;text-align:center}
+
+.ck-head .ck-stamp{margin:clamp(2px,.5dvh,5px) 0 0;
+  font-size:clamp(11px,1.4dvh,13px);line-height:1.3;letter-spacing:.3px;text-align:center}
+
+/* 到场人数：公共数据，放在头部外面单独一条胶囊，不挤进「三行」的节奏 */
+#view-checkin .ck-card-done .ck-rank{flex:0 0 auto;
+  margin:clamp(7px,1.1dvh,12px) auto 0;padding:clamp(3px,.55dvh,5px) 12px;
+  line-height:1.45;font-size:clamp(11px,1.35dvh,12.5px)}
+
+/* 时间轴：定高、按内容给呼吸，不参与余量分配 */
+#view-checkin .ck-card-done .ck-flow,
+#view-status #status-flow{margin:clamp(9px,1.5dvh,16px) 0 0;
+  padding:clamp(10px,2.2dvh,20px) 6px}
+
+#view-checkin .ck-card-done .ck-flow .ck-f b,
+#view-status #status-flow .ck-f b{font-size:clamp(13px,1.72dvh,15px)}
+
+#view-checkin .ck-card-done .ck-flow .ck-f span,
+#view-status #status-flow .ck-f span{font-size:clamp(10.5px,1.3dvh,12px);margin-top:3px}
+
+/* ② 领卡区：标题定高，主卡吃掉余量，副卡按内容定高 */
+#view-checkin .ck-card-done .ck-gifts,
+#view-status #status-actions .ck-gifts{flex:1 1 auto;display:flex;flex-direction:column;
+  min-height:0;margin:clamp(10px,1.6dvh,17px) 0 0}
+
+#view-checkin .ck-card-done .ck-gifts-t,
+#view-status #status-actions .ck-gifts-t{flex:0 0 auto;
+  margin:0 0 clamp(7px,1.1dvh,11px);font-size:clamp(12.5px,1.6dvh,14px);
+  font-weight:600;letter-spacing:.3px}
+
+/* 副卡：按内容定高，不参与余量分配。三卡平摊会把空白摊进每张卡，
+   每张都「虚胖」、谁都不重；余量集中给主卡，主卡的体量才立得起来。 */
+#view-checkin .ck-card-done .ck-gifts .cta-card,
+#view-status #status-actions .ck-gifts .cta-card{flex:0 0 auto;
+  min-height:clamp(70px,9.4dvh,84px);margin:0 0 clamp(6px,.95dvh,10px);
+  padding:clamp(9px,1.2dvh,12px) 14px clamp(9px,1.2dvh,12px) 13px}
+
+#view-checkin .ck-card-done .ck-gifts .cta-card:last-child,
+#view-status #status-actions .ck-gifts .cta-card:last-child{margin-bottom:0}
+
+/* 主卡：余量全给它，但设上限 —— 无限拉伸会让它变成一张「空 banner」 */
+#view-checkin .ck-card-done .ck-gifts .cta-card:first-of-type,
+#view-status #status-actions .ck-gifts .cta-card:first-of-type{
+  flex:1 1 auto;min-height:clamp(104px,16.5dvh,146px);
+  max-height:clamp(124px,19.5dvh,172px)}
+
+/* 主卡内容随高度同步放大：卡高了字还是 14，那只是「变胖」不是「变重」 */
+#view-checkin .ck-card-done .ck-gifts .ck-gifts-t + .cta-card .cta-body b,
+#view-status #status-actions .ck-gifts .ck-gifts-t + .cta-card .cta-body b{
+  font-size:clamp(17px,2.3dvh,21px);letter-spacing:.4px}
+
+#view-checkin .ck-card-done .ck-gifts .ck-gifts-t + .cta-card .cta-body small,
+#view-status #status-actions .ck-gifts .ck-gifts-t + .cta-card .cta-body small{
+  font-size:clamp(11.5px,1.55dvh,13.5px);line-height:1.6;max-width:17em}
+
+#view-checkin .ck-card-done .ck-gifts .ck-gifts-t + .cta-card .cta-go,
+#view-status #status-actions .ck-gifts .ck-gifts-t + .cta-card .cta-go{
+  flex:0 0 auto;min-width:clamp(82px,10.5dvh,96px);height:clamp(38px,4.9dvh,46px);
+  padding:0 clamp(14px,2dvh,18px);font-size:clamp(13px,1.75dvh,15px);
+  font-weight:600;border-radius:999px}
+
+/* 副卡：低主卡一档，但也要配得上自己的高度 */
+#view-checkin .ck-card-done .ck-gifts .cta-card:not(:first-of-type) .cta-body b,
+#view-status #status-actions .ck-gifts .cta-card:not(:first-of-type) .cta-body b{
+  font-size:clamp(14px,1.72dvh,15.5px)}
+
+#view-checkin .ck-card-done .ck-gifts .cta-card:not(:first-of-type) .cta-body small,
+#view-status #status-actions .ck-gifts .cta-card:not(:first-of-type) .cta-body small{
+  font-size:clamp(11px,1.38dvh,12.5px)}
+
+#view-checkin .ck-card-done .ck-gifts .cta-card:not(:first-of-type) .cta-go,
+#view-status #status-actions .ck-gifts .cta-card:not(:first-of-type) .cta-go{
+  flex:0 0 auto;min-width:74px;height:clamp(30px,3.9dvh,36px);padding:0 13px;
+  font-size:clamp(12px,1.4dvh,13px)}
+
+/* 小屏（375×667 实测溢出 19px）：只压内距与副卡高度，
+   主卡高度交给内容自己撑 —— 这一档要保的是「主卡能读、按钮好按」，
+   不是在 667 里也做出 844 那种体量。 */
+@media (max-height:700px){
+  #view-checkin .ck-card-done{padding:10px 14px 11px}
+
+  #view-checkin .ck-card-done .ck-rank{margin-top:6px;padding:2px 10px}
+
+  #view-checkin .ck-card-done .ck-flow{margin-top:8px;padding:9px 6px}
+
+  #view-checkin .ck-card-done .ck-gifts{margin-top:9px}
+
+  #view-checkin .ck-card-done .ck-gifts-t{margin-bottom:6px}
+
+  #view-checkin .ck-card-done .ck-gifts .cta-card{min-height:64px;
+    margin-bottom:6px;padding:8px 13px 8px 12px}
+
+  #view-checkin .ck-card-done .ck-gifts .cta-card:first-of-type{
+    min-height:96px;max-height:120px}
+}
+
+/* 状态页小屏（375×667）：加了时间轴后溢出 94px。
+   这一档按「先压间距、再压卡片高度、最后才动字号」的顺序收，
+   字号只降一档（23→21 / 副题 13→12），正文不动。 */
+@media (max-height:700px){
+  #view-status .ck-card-status{padding:10px 14px 11px}
+
+  #view-status .ck-head{margin:0 0 8px}
+
+  #view-status .ck-head .ck-title{font-size:21px}
+
+  #view-status .ck-head .ok-sub{font-size:12px}
+
+  #status-detail{padding:8px 11px;margin:0 0 6px;line-height:1.6}
+
+  #view-status #status-flow{margin:8px 0 0;padding:9px 6px}
+
+  #view-status #status-actions .ck-gifts{margin-top:8px}
+
+  #view-status #status-actions .ck-gifts .cta-card{min-height:64px}
+
+  #view-status #status-actions .ck-gifts .cta-card:first-of-type{
+    min-height:92px;max-height:100px}
+
+  /* 未报名态比别的态多一个「回首页报名」按钮（50px），667 上溢出 39px。
+     base 里 .actions 上下各 24px 的外边距，在「按钮 + 领卡区」这种
+     双段的 actions 里纯属浪费，压掉就是。 */
+  #view-status #status-actions{margin:12px 0 0}
+
+  #view-status #status-actions > .btn-primary{min-height:46px}
+
+  #view-status.active .foot{padding:12px 0 calc(env(safe-area-inset-bottom) + 10px)}
+}
+
+
+/* ==================================================================
+   v127 · 提示类页面统一：头部一律左右结构，腾出的高度给领卡
+   覆盖：签到成功 / 签到未开放 / 现场登记 / 身份异常 / 状态页六态
+   ================================================================== */
+
+/* status 页用的是 ok-badge / ok-sub，并入同一套头部语言（48 + 24，与 ck-badge 一致） */
+.ck-head .ok-badge{flex:0 0 auto;width:48px;height:48px;margin:0;
+  box-shadow:0 6px 16px rgba(27,169,160,.22)}
+
+.ck-head .ok-badge svg{width:24px;height:24px}
+
+.ck-head .ok-sub{margin:clamp(3px,.6dvh,6px) 0 0;text-align:center;
+  font-size:clamp(12px,1.55dvh,14.5px);line-height:1.3;letter-spacing:.8px;color:var(--teal-d)}
+
+/* base 里 #view-status h2 是 id+element，特异性压得过无前缀的 .ck-head .ck-title；
+   字号/行高已在上面那组带 id 前缀的规则里统一，这里只补颜色。 */
+#view-status .ck-head .ck-title{color:var(--ink)}
+
+/* 头部与下方内容之间：固定呼吸，不再靠 auto 均分 */
+#view-status .ck-head{margin:clamp(6px,1.2dvh,14px) 0 clamp(9px,1.5dvh,15px)}
+
+/* 灰色副题：签到未开放 / 现场登记 / 身份异常，这三态没有"好消息"要说 */
+.ck-sub-quiet{color:var(--muted)}
+
+/* 警示徽章：身份读不到那类页面，图标不该还是表示成功的青蓝 */
+.ck-badge.ck-badge-warn{background:linear-gradient(135deg,var(--coral-l2),var(--coral));
+  box-shadow:0 6px 16px rgba(255,107,74,.26)}
+
+/* 状态详情条：紧凑一档，把高度让给领卡 */
+#status-detail{padding:clamp(9px,1.4dvh,14px) clamp(11px,1.6dvh,15px);
+  margin:0 0 clamp(9px,1.4dvh,14px);border-radius:14px;
+  font-size:clamp(12px,1.5dvh,13.5px);line-height:1.72;color:#4a6570;
+  background:#f7f9fb;text-align:left}
+
+/* 未报名态：actions 里只有按钮、没有领卡区，别让 flex 把它拉成一条 */
+#view-status #status-actions > .btn-primary{flex:0 0 auto;margin-top:clamp(6px,1dvh,10px)}
+
+/* 签到页提示态（未开放 / 现场登记 / 身份异常）：卡片内的文案与按钮同样紧凑化 */
+#checkin-state > .ck-card .ck-head{margin:0 0 clamp(8px,1.3dvh,13px)}
+
+/* 上边距留一点：head 的 margin-bottom 只有 8px 左右，正文再贴上去，
+   和副题连成一段，读者会把它当成副题的第二行，不像一句独立说明 */
+#checkin-state > .ck-card .ck-lead{margin:clamp(3px,.75dvh,6px) 0 clamp(10px,1.6dvh,16px);
+  font-size:clamp(12px,1.5dvh,13.5px)}
+
+/* 注意：光给 .ck-gifts 写 flex:1 是没用的——.ck-card 本身不是 flex 容器。
+   这里只把它变成 column 容器，高度继续由内容决定（margin auto 居中）。 */
+#checkin-state > .ck-card-notice{display:flex;flex-direction:column;min-height:0}
+
+/* 提示态（未开放 / 现场登记 / 身份异常）的卡片：按内容定高、上下居中，
+   和状态页 .ck-card-status 同一套。这些态的信息量本来就少，
+   硬撑满高度只会把空白变成卡片底部一个大洞或卡间距里的大缝，
+   读起来像「没填满」；居中之后空白留在卡片外，是「留白」。 */
+#checkin-state > .ck-card:not(.ck-card-done) .ck-gifts{flex:0 0 auto;
+  display:flex;flex-direction:column;min-height:0;
+  margin:clamp(11px,1.8dvh,18px) 0 0}
+
+#checkin-state > .ck-card:not(.ck-card-done) .ck-gifts .cta-card{flex:0 0 auto;
+  min-height:clamp(70px,9.4dvh,84px);margin:0 0 clamp(6px,.95dvh,10px)}
+
+#checkin-state > .ck-card:not(.ck-card-done) .ck-gifts .cta-card:first-of-type{
+  min-height:clamp(104px,16.5dvh,146px);max-height:clamp(124px,19.5dvh,172px)}
+
+#checkin-state > .ck-card:not(.ck-card-done) .ck-gifts .cta-card:last-child{margin-bottom:0}
+
+/* 提示卡小屏（375×667）：这一态要塞「头部 + 说明 + 主按钮 + 小字 + 领卡区」
+   五段，比成功页还挤，溢出 35px。内距、各段间距、卡片高度一起降一档。
+   必须放在文件末尾 —— 上面那组不带 media 的规则特异性相同，
+   写在它们前面会被整段覆盖掉。 */
+@media (max-height:700px){
+  #checkin-state > .ck-card-notice{padding:13px 14px 12px}
+
+  #checkin-state > .ck-card-notice .ck-head{margin-bottom:7px}
+
+  /* 660 以下竖向本来就紧，正文与头部之间不再另加上间距，靠 head 的 margin 分隔 */
+  #checkin-state > .ck-card-notice .ck-lead{margin:0 0 8px}
+
+  #checkin-state > .ck-card-notice .ck-hint{margin-top:7px}
+
+  #checkin-state > .ck-card-notice .ck-gifts{margin-top:7px}
+
+  #checkin-state > .ck-card-notice .ck-gifts-t{margin-bottom:5px}
+
+  /* 卡片高度两条必须写成 .ck-card.ck-card-notice：
+     上面那条带 :not(.ck-card-done) 的规则算 4 个 class，
+     只写 .ck-card-notice 是 3 个，压不过它。 */
+  #checkin-state > .ck-card.ck-card-notice .ck-gifts .cta-card{min-height:64px;
+    margin-bottom:5px;padding:8px 13px 8px 12px}
+
+  #checkin-state > .ck-card.ck-card-notice .ck-gifts .cta-card:first-of-type{
+    min-height:88px;max-height:104px}
+}
+
+/* 640 及以下（360×640 小屏安卓）：700 那档还差 5px 才装得下
+   「未报名」态（比其他态多一个报名按钮）。只再压按钮和详情条行高。 */
+@media (max-height:660px){
+  #view-status #status-actions > .btn-primary{min-height:42px;
+    margin-top:5px;font-size:16px}
+
+  #status-detail{line-height:1.5}
+}

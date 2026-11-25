@@ -1,0 +1,35 @@
+    <section class="view" id="view-signup" data-route="signup">
+
+      <form id="signup-form" class="form su-form su-page" novalidate>
+        <!-- 两步流程：第一步落库即视为报名成功（凭证码此步生成），原地切第二步补充信息。
+             字段本身不再写在这里——P3-b 起由 /form 下发的 schema 渲染（form-render.js），
+             运营在后台改字段，这里跟着变。步骤数由 schema 里字段的 step 决定。 -->
+        <div class="steps">
+          <div class="step-bar"><i id="su-bar"></i></div>
+          <div class="step-txt">
+            <span id="su-step-name">第 1 步 / 共 2 步 · 基本信息</span>
+            <b id="su-step-pct">待填写</b>
+          </div>
+        </div>
+
+        <div class="su-scroll step-pane" id="su-pane1"></div>
+
+        <div class="su-scroll step-pane" id="su-pane2" hidden>
+          <button type="button" class="back-link" id="su-back">返回上一步修改信息</button>
+        </div>
+
+        <!-- 固定尾栏：隐私勾选与提交按钮始终可见，不随字段滚动 -->
+        <div class="su-foot">
+          <label class="privacy" id="privacy-row">
+            <input name="privacy" type="checkbox" /> 我已阅读并同意<a href="#" id="privacy-link">《个人信息处理说明》</a>
+          </label>
+          <button type="submit" class="btn-primary block" id="su-submit">保存，下一步</button>
+          <p class="form-msg" id="signup-msg"></p>
+        </div>
+      </form>
+
+      <!-- 活动资料下载（专业版）：后端未开通/没配时不渲染，弱入口不抢报名主路径 -->
+      <div class="su-material" id="material-entry-signup" style="display:none"></div>
+
+      <footer class="foot">活动服务平台 · <a href="#" data-contact>咨询主办方</a></footer>
+    </section>

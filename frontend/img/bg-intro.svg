@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 1622" width="750" height="1622" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eaf7fb"/>
+      <stop offset="0.34" stop-color="#f7fcfd"/>
+      <stop offset="0.62" stop-color="#eef9fa"/>
+      <stop offset="1" stop-color="#d9f0f2"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.46" r="0.52">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.92"/>
+      <stop offset="0.62" stop-color="#ffffff" stop-opacity="0.38"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="ribbonTop" x1="0" y1="0" x2="1" y2="0.4">
+      <stop offset="0" stop-color="#7fd3c8" stop-opacity="0.85"/>
+      <stop offset="0.45" stop-color="#5cb8e8" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#a8e6f2" stop-opacity="0.35"/>
+    </linearGradient>
+    <linearGradient id="ribbonBottom" x1="0" y1="0" x2="1" y2="0.6">
+      <stop offset="0" stop-color="#8fe0d0" stop-opacity="0.75"/>
+      <stop offset="0.5" stop-color="#59b9e6" stop-opacity="0.65"/>
+      <stop offset="1" stop-color="#bfeef4" stop-opacity="0.3"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="750" height="1622" fill="url(#sky)"/>
+  <rect width="750" height="1622" fill="url(#glow)"/>
+
+  <path d="M-40 96 C 120 18, 300 132, 470 96 C 590 70, 700 24, 800 46 L 800 -40 L -40 -40 Z" fill="url(#ribbonTop)"/>
+  <path d="M-40 150 C 130 74, 306 186, 486 148 C 604 122, 706 76, 800 96 L 800 128 C 690 108, 590 158, 470 184 C 300 220, 120 108, -40 186 Z" fill="#ffffff" opacity="0.5"/>
+
+  <path d="M-40 1408 C 140 1330, 300 1462, 470 1424 C 600 1394, 700 1346, 800 1368 L 800 1622 L -40 1622 Z" fill="url(#ribbonBottom)"/>
+  <path d="M-40 1462 C 150 1388, 306 1516, 490 1478 C 612 1452, 712 1406, 800 1426 L 800 1470 C 690 1450, 596 1500, 474 1526 C 300 1562, 130 1452, -40 1528 Z" fill="#ffffff" opacity="0.45"/>
+  <path d="M-40 1524 C 170 1462, 330 1566, 508 1532 C 626 1510, 716 1478, 800 1492 L 800 1622 L -40 1622 Z" fill="#6fc9d6" opacity="0.42"/>
+  <path d="M-40 1352 C 160 1292, 320 1396, 500 1360 C 620 1336, 710 1300, 800 1316" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="3"/>
+  <path d="M-40 1490 C 160 1436, 320 1530, 500 1498 C 620 1476, 710 1442, 800 1456" fill="none" stroke="#ffffff" stroke-opacity="0.5" stroke-width="2.5"/>
+</svg>

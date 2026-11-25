@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="签到会">
+  <rect width="64" height="64" rx="14" fill="#1ba9a0"/>
+  <path d="M9 41c6.5 0 6.5-6.5 13-6.5S28.5 41 35 41s6.5-6.5 13-6.5S54.5 41 55 41"
+        stroke="#fff" stroke-width="4.2" fill="none" stroke-linecap="round"/>
+  <path d="M9 27c6.5 0 6.5-6.5 13-6.5S28.5 27 35 27s6.5-6.5 13-6.5S54.5 27 55 27"
+        stroke="#fff" stroke-width="4.2" fill="none" stroke-linecap="round" opacity=".5"/>
+</svg>

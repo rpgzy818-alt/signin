@@ -1,0 +1,10 @@
+/*@include: admin/admin-common.js*/
+/*@include: admin/admin-session.js*/
+/*@include: admin/admin-utils.js*/
+/*@include: flows/admin/admin.js*/
+/*@include: flows/admin/admin-data.js*/
+/*@include: flows/admin/admin-config.js*/
+/*@include: flows/admin/admin-p8.js*/
+/*@include: flows/admin/admin-form.js*/
+/*@include: flows/admin/admin-staff.js*/
+/*@include: admin/admin-boot.js*/

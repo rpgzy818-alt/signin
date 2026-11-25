@@ -1,0 +1,32 @@
+# 签到会 —— 一键启动
+#
+#   cp backend/.env.example .env   # 改掉 ADMIN_TOKEN 和 STAFF_TOKENS
+#   docker compose up -d
+#   打开 http://localhost:8080       参与者页面
+#   打开 http://localhost:8080/admin/ 主办方后台（账号 admin，密码见 .env 的 ADMIN_TOKEN）
+#
+# 数据（数据库、上传附件、物料图）都在 ./data 下，备份这个目录就够了。
+
+services:
+  signin:
+    build: .
+    image: signin:0.1.0
+    container_name: signin
+    restart: unless-stopped
+    ports:
+      - "8080:8087"
+    env_file:
+      - .env
+    environment:
+      # 这两个覆盖 .env 里的值，确保容器里路径一定落在卷上
+      DB_PATH: /data/signin_prod.db
+      WEB_ROOT: /data
+      FRONTEND_DIR: /app/frontend
+    volumes:
+      - ./data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8087/api/health',timeout=2)"]
+      interval: 30s
+      timeout: 3s
+      start_period: 15s
+      retries: 3

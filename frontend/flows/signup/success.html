@@ -1,0 +1,49 @@
+    <section class="view" id="view-success" data-route="success">
+      <div class="ck-card ck-success">
+        <!-- v121：头部改左右结构——图标在左、文案在右，省下的纵向空间让给凭证与领卡 -->
+        <div class="su-head">
+          <div class="ck-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.6 9.6 17.6 19.6 6.8"/></svg>
+          </div>
+          <div class="su-head-txt">
+            <h2 class="ck-title">报名成功</h2>
+            <p class="ck-sub">感谢参与本次活动</p>
+            <p class="su-rank" id="success-rank" style="display:none"></p>
+          </div>
+        </div>
+
+        <div class="cred-block">
+          <!-- v123：标签与凭证码并成一行（原来竖排三行吃掉约 40px）。
+               姓名仍单独一行——那是持证人身份，混进码里就分不清哪个是凭证了 -->
+          <div class="cred-head">
+            <span class="cred-label">参会凭证</span>
+            <span class="credential-code" id="cred-code">—</span>
+          </div>
+          <div class="credential-name" id="cred-name"></div>
+          <div class="cred-qr" id="cred-qr" style="display:none"></div>
+        </div>
+
+        <div class="cred-ops">
+          <button type="button" class="btn-ghost" id="save-cred">保存凭证</button>
+          <button type="button" class="btn-ghost" id="success-cal">加日历</button>
+        </div>
+        <!-- RD-04 报名附件（基础版承诺：图≤2、文档≤1、≤5M）。
+             弱入口，选填；未上传不影响报名与签到。 -->
+        <div class="su-attach" id="attach-entry" style="display:none">
+          <button type="button" class="btn-ghost" id="attach-open">补充材料（选填）</button>
+          <div id="attach-list"></div>
+        </div>
+        <canvas id="cred-canvas" width="1080" height="1320" style="display:none"></canvas>
+
+        <p class="cred-edit"><a href="#" id="edit-info">信息填错了？点此修改</a></p>
+
+        <!-- 活动资料下载（专业版）：未开通不渲染 -->
+        <div class="su-material" id="material-entry-success" style="display:none"></div>
+
+        <div id="success-cta"></div>
+
+        <!-- 底部标识（原广告位）：体验版才有，内容与开关都在 core.js 的 techBadgeHTML -->
+        <div id="tech-badge"></div>
+      </div>
+      <footer class="foot">活动服务平台 · <a href="#" data-contact>咨询主办方</a></footer>
+    </section>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>会议活动管理系统</title>
+  <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
+  <!-- 站点配置必须在所有业务脚本之前同步加载：接口基址与物料二维码都读它（见 site-config.js） -->
+  <script src="../site-config.js?v=1"></script>
+  <script src="../core/actlink.js?v=1"></script>
+  <!-- 平台化配置块中的 API 前缀与活动标识，供 JS 读取（见 admin-common.js） -->
+  <link rel="stylesheet" href="../core/base.css?v=159" />
+  <!-- 后台样式与参与者端同源一份，放 flows/admin/ 下避免维护两套；独立成包时再拆出去 -->
+  <link rel="stylesheet" href="../flows/admin/admin.css?v=161" />
+</head>
+<body data-app="admin">
+  <div id="app">
+    <!--@include: flows/admin/admin.html-->
+    <div id="toast" class="toast"></div>
+
+    <div id="gw-modal" class="modal" style="display:none">
+      <div class="modal-mask" id="gw-mask"></div>
+      <div class="modal-box gw-box">
+        <h3>签到开放时间</h3>
+        <p class="gw-tip">窗口之外，即使签到开关是开着的，用户扫码也无法签到。改完立即生效。</p>
+        <div class="gw-field">
+          <span class="gw-lb">开始时间</span>
+          <div class="dt">
+            <input type="date" class="dt-date" id="gw-start-date" />
+            <select class="dt-h" id="gw-start-h" aria-label="开始小时"></select>
+            <span class="dt-colon">:</span>
+            <select class="dt-m" id="gw-start-m" aria-label="开始分钟"></select>
+          </div>
+        </div>
+        <div class="gw-field">
+          <span class="gw-lb">结束时间</span>
+          <div class="dt">
+            <input type="date" class="dt-date" id="gw-end-date" />
+            <select class="dt-h" id="gw-end-h" aria-label="结束小时"></select>
+            <span class="dt-colon">:</span>
+            <select class="dt-m" id="gw-end-m" aria-label="结束分钟"></select>
+          </div>
+        </div>
+        <p class="form-msg" id="gw-msg"></p>
+        <button type="button" class="btn-primary block" id="gw-save">保存</button>
+        <button type="button" class="btn-ghost block" id="gw-cancel">取消</button>
+      </div>
+    </div>
+
+    <div id="swt-modal" class="modal" style="display:none">
+      <div class="modal-mask" id="swt-mask"></div>
+      <div class="modal-box gw-box">
+        <h3 id="swt-title">时效设置</h3>
+        <p class="gw-tip" id="swt-tip"></p>
+        <div class="gw-field">
+          <span class="gw-lb">到点时间</span>
+          <div class="dt">
+            <input type="date" class="dt-date" id="swt-date" />
+            <select class="dt-h" id="swt-h" aria-label="小时"></select>
+            <span class="dt-colon">:</span>
+            <select class="dt-m" id="swt-m" aria-label="分钟"></select>
+          </div>
+        </div>
+        <p class="form-msg" id="swt-msg"></p>
+        <button type="button" class="btn-primary block" id="swt-save">保存</button>
+        <button type="button" class="btn-ghost block" id="swt-clear">取消时效限制</button>
+        <button type="button" class="btn-ghost block" id="swt-cancel">返回</button>
+      </div>
+    </div>
+
+    <div id="pwd-modal" class="modal" style="display:none">
+      <div class="modal-mask" id="pwd-mask"></div>
+      <div class="modal-box pwd-box">
+        <h3>修改登录密码</h3>
+        <form id="pwd-form" class="pwd-form">
+          <label>原密码<input name="old_password" type="password" autocomplete="current-password" /></label>
+          <label>新密码<input name="new_password" type="password" placeholder="至少 8 位" autocomplete="new-password" /></label>
+          <label>确认新密码<input name="confirm" type="password" autocomplete="new-password" /></label>
+          <button type="submit" class="btn-primary block">保存新密码</button>
+          <p class="form-msg" id="pwd-msg"></p>
+        </form>
+        <button type="button" class="btn-ghost block" id="pwd-close">取消</button>
+      </div>
+    </div>
+
+    <div id="reg-edit-modal" class="modal" style="display:none">
+      <div class="modal-mask" id="reg-edit-mask"></div>
+      <div class="modal-box reg-edit-box">
+        <h3>修改报名信息</h3>
+        <form id="reg-edit-form" class="pwd-form">
+          <input type="hidden" name="id" />
+          <label>姓名<input name="name" type="text" maxlength="20" /></label>
+          <label>手机号
+            <span class="reg-line">
+              <input name="phone_code" type="tel" inputmode="numeric" maxlength="5" value="86" class="reg-cc" />
+              <input name="phone" type="tel" inputmode="numeric" maxlength="15" />
+            </span>
+          </label>
+          <label>性别
+            <select name="gender"><option value="">未填</option><option>男</option><option>女</option></select>
+          </label>
+          <label class="reg-span2">其它报名信息（JSON）
+            <textarea name="answers" rows="6" placeholder='{"单位":"…","职务":"…"}'></textarea>
+          </label>
+          <p class="reg-edit-tip">上框是这场活动报名表的自定义字段值，按活动实际字段填写。</p>
+          <p class="form-msg" id="reg-edit-msg"></p>
+          <div class="reg-actions">
+            <button type="button" class="btn-ghost" id="reg-edit-close">取消</button>
+            <button type="submit" class="btn-primary">保存修改</button>
+          </div>
+        </form>
+        <p class="reg-edit-tip">凭证码不随信息修改而变化；每次改动都会记入操作日志。</p>
+      </div>
+    </div>
+  </div>
+  <script src="../js/vendor/qrcode.min.js"></script>
+  <script src="admin.js?v=5"></script>
+</body>
+</html>

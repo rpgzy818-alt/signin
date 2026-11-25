@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>活动报名平台</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg?v=1" />
+  <link rel="apple-touch-icon" href="img/share-fab.png" />
+  <!-- 站点配置必须在所有业务脚本之前同步加载：接口基址与分享链接都读它（见 site-config.js） -->
+  <script src="site-config.js?v=1"></script>
+  <!-- 活动链接实现：必须在业务脚本之前，页面任何链接都靠它决定形态 -->
+  <script src="core/actlink.js?v=1"></script>
+  <link rel="stylesheet" href="core/base.css?v=161" />
+  <link rel="stylesheet" href="flows/signup/signup.css?v=155" />
+  <link rel="stylesheet" href="flows/checkin/checkin.css?v=149" />
+  <link rel="stylesheet" href="flows/staff/staff.css?v=150" />
+  <link rel="stylesheet" href="flows/org/org.css?v=1" />
+  <link rel="stylesheet" href="flows/admin/admin.css?v=156" />
+</head>
+<body>
+  <div id="app">
+    <!-- 顶部品牌条（介绍页隐藏，让首屏保持整屏视觉） -->
+    <header class="brand-bar">
+      <button class="brand-back" id="brandBack" type="button" aria-label="返回上一页" data-back-to="">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M15 4.8 8 12l7 7.2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span class="brand-main" data-activity-name>活动报名</span>
+    </header>
+
+    <!-- 背景音乐开关：固定右上角。介绍页没有品牌条，放 header 里会跟着一起隐藏 -->
+    <button class="bgm-btn is-off" id="bgmBtn" type="button" aria-label="背景音乐开关" aria-pressed="false">
+      <span class="bgm-disc">
+        <svg viewBox="330 275 400 495" aria-hidden="true"><path d="M428.916 672.628c0 12.521-3.49 30.115-7.54 39.145-11.543 25.088-48.175 46.639-77.73 46.639-18.06 0-32.117-5.027-40.635-14.523-6.516-8.005-11.031-19.549-11.031-30.114 0-22.575 17.035-43.148 44.637-54.18 11.031-4.514 21.085-6.516 30.58-6.516 15.546 0 29.603 2.514 39.61 7.029V355.095l291.468-70.749v317.021c0 25.088-8.518 45.15-25.088 60.696-18.06 16.058-40.634 25.6-62.185 25.6-18.06 0-31.604-5.027-40.122-14.523-6.516-8.005-11.031-19.549-11.031-30.115 0-19.549 13.032-38.12 34.63-49.664 11.543-6.004 29.602-11.543 39.144-11.543 15.546 0 30.58 2.514 42.636 7.54v-222.72l-247.343 61.673v244.317z"/></svg>
+      </span>
+      <span class="bgm-slash" aria-hidden="true"></span>
+    </button>
+
+    <!-- 1. 活动介绍页：整屏品牌叙事（背景图 + 左对齐信息轴 + 上滑进入） -->
+    <!--@include: flows/signup/intro.html-->
+
+    <!-- 2. 活动介绍页：讲清"值不值得来"，一屏读完 -->
+    <!--@include: flows/signup/event.html-->
+
+    <!-- 3. 报名页：只放表单，活动信息在上一页讲完 -->
+    <!--@include: flows/signup/signup.html-->
+
+    <!-- 3. 报名成功页：凭证与操作收在同一张卡里 -->
+    <!--@include: flows/signup/success.html-->
+
+    <!-- 4. 签到结果页：签到状态与现场节奏由 JS 按状态渲染 -->
+    <!--@include: flows/checkin/checkin.html-->
+
+    <!-- 6. 现场补录页 -->
+    <!--@include: flows/staff/walkin.html-->
+
+    <!-- 7. 核销页：工作人员在签到台用，一个字输错就查不到，所以码要大、结果要一眼可辨 -->
+    <!--@include: flows/staff/verify.html-->
+
+    <!-- 7.1 统一状态提示页：任意入口、任意次数进入，只按扫码者自己的状态显示 -->
+    <!--@include: flows/checkin/status.html-->
+
+    <!-- 7.2 工作人员微信绑定页（扫后台生成的一次性绑定码进入） -->
+    <!--@include: flows/staff/staff-bind.html-->
+
+    <!-- 8. P6 自助查询 / 展位 / 座位 -->
+
+    <!-- 9. 机构入口页（RD-13）：机构域名进来先看该机构有哪些活动 -->
+
+    <!-- 7.3 二维码弹层：关注公众号 / 企微客服群，长按识别 -->
+    <div id="qr-modal" class="modal" style="display:none">
+      <div class="modal-mask" id="qr-mask"></div>
+      <div class="modal-box qr-modal-box">
+        <h3 id="qr-modal-title">二维码</h3>
+        <img id="qr-modal-img" class="qr-modal-img" src="" alt="" />
+        <p class="qr-modal-tip"><b>长按二维码</b>，点「识别图中二维码」</p>
+        <button type="button" class="btn-ghost block" id="qr-modal-close">关闭</button>
+      </div>
+    </div>
+
+    <!-- 7.35 签到窗口编辑：改完立即生效，无需重启服务 -->
+    <!-- 7.36 报名截止 / 活动结束 的时效设置 -->
+    <!-- 7.4 自定义下拉：不用系统原生 select，避免鸿蒙/安卓 WebView 弹出各自的滚轮选择器 -->
+    <div id="pick-modal" class="modal" style="display:none">
+      <div class="modal-mask" id="pick-mask"></div>
+      <div class="modal-box pick-box">
+        <h3 id="pick-title">请选择</h3>
+        <div id="pick-options" class="pick-opts"></div>
+        <button type="button" class="btn-ghost block" id="pick-close">取消</button>
+      </div>
+    </div>
+
+    <!-- 8. 管理后台（独立 PC 端界面：侧边导航 + 分区内容，与用户端 H5 完全区隔） -->
+
+    <div id="toast" class="toast"></div>
+
+    <!-- 微信内保存凭证：只能长按图片存相册 -->
+    <div id="img-modal" class="modal" style="display:none">
+      <div class="modal-mask" id="img-mask"></div>
+      <div class="modal-box img-box">
+        <h3>请查收您的参会凭证</h3>
+        <img id="img-tip" alt="参会凭证" />
+        <p class="img-tip">长按上方图片保存到相册</p>
+        <button class="btn-ghost block" id="img-close">知道了</button>
+      </div>
+    </div>
+
+    <!-- 微信内无法导入日历时的手动兜底 -->
+    <div id="cal-modal" class="modal" style="display:none">
+      <div class="modal-mask" id="cal-mask"></div>
+      <div class="modal-box cal-box">
+        <div class="cal-ic" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="15" rx="3"/><path d="M8 3.2v4M16 3.2v4M3.5 10.5h17M12 14v3.2M12 17.2h.01"/></svg>
+        </div>
+        <h3>微信内不能直接导入日历</h3>
+        <p class="cal-tip">按下面 3 步操作，10 秒就能存进手机</p>
+
+        <ol class="cal-steps">
+          <li>点右上角「<b>···</b>」</li>
+          <li>选「<b>在浏览器打开</b>」</li>
+          <li>回到页面点「<b>加日历</b>」</li>
+        </ol>
+
+        <div class="cal-info" id="cal-info"></div>
+
+        <button class="btn-primary block" id="cal-copy">复制活动信息</button>
+        <button class="cal-skip" id="cal-close">先不用了</button>
+      </div>
+    </div>
+
+    <!-- 修改本人登录密码 -->
+    <!-- 后台：修改报名信息（列表里是脱敏值，此处再从接口取完整值预填） -->
+    <!-- 3.5 领奖页已废弃，路由不再可达 -->
+
+    <!-- 个人信息处理说明 弹层 -->
+    <div id="privacy-modal" class="modal" style="display:none">
+      <div class="modal-mask" id="privacy-mask"></div>
+      <div class="modal-box">
+        <h3>个人信息处理说明</h3>
+        <div class="modal-body">
+          <p>为保障您的合法权益，我们根据《中华人民共和国个人信息保护法》等法律法规，就本次活动的个人信息处理说明如下：</p>
+          <p><b>一、处理者</b><br>本次活动由「<span data-privacy="org">活动主办方</span>」组织，线上报名与签到服务由本平台提供技术支持。</p>
+          <p><b>二、收集目的</b><br>仅用于：（1）活动报名审核与现场签到核验；（2）活动相关的必要联系。我们不会将您的个人信息用于与上述目的无关的其他用途，亦不会向无关第三方提供或泄露。</p>
+          <p><b>三、收集范围</b><br><span data-privacy="fields">姓名、手机号等报名所需信息</span>。其中手机号用于联系与签到身份匹配，其余字段用于本次活动报名与现场核验。具体以本活动报名表实际要求填写的字段为准。</p>
+          <p><b>敏感信息说明</b><br>本平台不支持收集您的银行卡号、身份证号码及证件照片。如活动方以任何变相形式要求您提交上述信息，请您谨慎核对，产生的责任由活动组织机构承担，与本平台和系统无关。</p>
+          <p><b>四、存储期限</b><br>我们仅在实现上述目的所必需的最短期限内保存您的个人信息；活动结束后，将按最小必要原则进行匿名化或删除，保存期限不超过活动结束之日起 30 日（法律、行政法规另有规定除外）。</p>
+          <p><b>五、您的权利</b><br>您有权查询、更正、复制、删除您的个人信息，或撤回授权同意。如需行使权利或咨询，请联系本次活动主办方「<span data-privacy="org">活动主办方</span>」（联系方式见现场公示）。</p>
+          <p><b>六、自主确认</b><br>勾选即代表您已充分阅读并理解本说明，自愿同意我们按照上述范围与目的处理您的个人信息。</p>
+        </div>
+        <!-- 主按钮=同意（关闭同时勾选）；下面一行弱提示=不同意（关闭且不勾选）。
+             两条路都要能点到，所以弱提示做的是「低权重按钮」而不是一行纯文字：
+             字号压到 12、颜色用 muted，但点击区留足 34px 高度。 -->
+        <button type="button" class="btn-primary block" id="privacy-close">我已知晓并同意</button>
+        <button type="button" class="modal-weak" id="privacy-decline">不同意，返回</button>
+      </div>
+    </div>
+
+    <!-- 更多地图：各渠道用各自坐标系，不混用 -->
+    <div id="map-panel" class="modal" style="display:none">
+      <div class="modal-mask" id="map-mask"></div>
+      <div class="modal-box">
+        <h3>选择地图打开</h3>
+        <div class="map-list">
+          <a data-map="amap" target="_blank" rel="noopener">高德地图（推荐）</a>
+          <a data-map="qq" target="_blank" rel="noopener">腾讯地图</a>
+          <a data-map="baidu" target="_blank" rel="noopener">百度地图</a>
+          <a data-map="apple" target="_blank" rel="noopener">Apple 地图（iOS）</a>
+        </div>
+        <button class="btn-ghost block" id="map-close">取消</button>
+      </div>
+    </div>
+
+    <!-- 参会凭证找回（RD-21 G7）：签到成功页弱入口，同一微信打开即可拿到 -->
+    <div id="cred-view-modal" class="modal" style="display:none">
+      <div class="modal-mask" id="cvm-mask"></div>
+      <div class="modal-box">
+        <h3>参会凭证</h3>
+        <div class="modal-body">
+          <p class="cvm-code" id="cvm-code">—</p>
+          <div class="cvm-qr" id="cvm-qr"></div>
+          <p class="qr-tip">请截图保存；现场出示二维码或报出凭证码</p>
+        </div>
+        <button type="button" class="btn-primary block" id="cvm-close">知道了</button>
+      </div>
+    </div>
+    <!-- 咨询主办方（RD-15）：页脚弱入口，不进主叙事 -->
+    <div id="contact-modal" class="modal" style="display:none">
+      <div class="modal-mask" id="contact-mask"></div>
+      <div class="modal-box">
+        <h3>咨询主办方</h3>
+        <div class="modal-body">
+          <p>本次活动由「<span data-activity-org>活动主办方</span>」组织。</p>
+          <p>如需咨询报名、签到或活动安排，请联系主办方，联系方式见现场公示或活动通知。</p>
+        </div>
+        <button type="button" class="btn-primary block" id="contact-close">知道了</button>
+      </div>
+    </div>
+  <!-- P5 CTA 补充入口：后台配置的活动级按钮（电话/外链/物料等），按 position 显示。
+       合规由后端写入时保证，这里只渲染。 -->
+  <button type="button" id="query-entry" class="query-entry" style="display:none">信息查询</button>
+  <div id="cta-extra" class="cta-extra" aria-label="更多入口"></div>
+  <!-- 分享引导：右侧悬浮球 + 点击后的蒙层指引（高亮右上角「···」，3 秒自动消失）；仅微信内出现 -->
+    <button type="button" id="share-fab" class="share-fab" style="display:none" aria-label="分享">
+      <img src="img/share-fab.png" alt="" />
+    </button>
+    <div id="share-hint" class="share-hint" style="display:none" role="status">
+      <span class="share-hint-ring" aria-hidden="true"></span>
+      <span class="share-hint-bubble">点右上角「···」分享给朋友</span>
+    </div>
+  </div>
+  <!-- 背景音乐：src 由 /api/config 下发，后台关掉时这里连文件都不请求（preload=none） -->
+  <audio id="bgm" loop preload="none" playsinline></audio>
+  <script src="https://res.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+  <script src="js/vendor/qrcode.min.js?v=1"></script>
+  <script src="js/app.js?v=154"></script>
+</body>
+</html>

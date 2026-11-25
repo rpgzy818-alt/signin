@@ -1,0 +1,48 @@
+    <section class="view view-full" id="view-intro" data-route="intro">
+      <!-- v103：放弃流式居中，改为「设计稿等比定位」。
+           背景图 750×1622 居中裁成 9:16 后与设计稿背景完全重合，
+           所以 .intro-stage 按背景图真实比例撑开（永远铺满视口），
+           内层 .intro-safe 取其中 9:16 的基准区，所有文字按设计稿
+           941×1672 的百分比坐标绝对定位 —— 换任何机型只做上下缩放，
+           字与桥塔的相对位置恒定。 -->
+      <div class="intro-screen">
+        <div class="intro-stage">
+          <!-- 模糊底：上滑时整屏缩小，四周露出的是同一张图的虚化版，
+               而不是一块纯色，视觉上像「页面浮起来」 -->
+          <img class="intro-bg-blur" src="img/bg-intro.svg" alt="" aria-hidden="true" />
+          <img class="intro-bg" src="img/bg-intro.svg" alt="" fetchpriority="high" />
+
+          <div class="intro-safe">
+            <div class="intro-head">
+              <p class="intro-line1"><i aria-hidden="true"></i><span data-intro="line1">2026 城市服务开放日</span><i aria-hidden="true"></i></p>
+              <p class="intro-line2" data-intro="line2">活动邀请函</p>
+              <span class="intro-rule" aria-hidden="true"></span>
+            </div>
+
+            <!-- 主标语：原为书法字图（已去品牌），改为纯文本两行，字号按原图等高排布 -->
+            <h1 class="intro-wordmark"><span>城市有温度</span><span>服务有回响</span></h1>
+
+            <p class="intro-desc" data-intro="desc"><span>城市的每一项服务，</span><span>都始于一次真实的相遇。</span><span>这一次，我们把窗口打开，</span><span>请你走近，看一看，问一问。</span><span>开放日现场，等你到场。</span></p>
+
+            <div class="intro-sign">
+              <svg class="intro-pin" viewBox="0 0 25 35" aria-hidden="true">
+                <defs>
+                  <linearGradient id="pinG" x1="0" y1="0" x2="0.35" y2="1">
+                    <stop offset="0" stop-color="#63c3bb" /><stop offset="1" stop-color="#1e8489" />
+                  </linearGradient>
+                </defs>
+                <path d="M12.5 0C5.6 0 0 5.6 0 12.5c0 8.6 10.4 19.9 11.8 22.1a.9.9 0 0 0 1.4 0C14.6 32.4 25 21.1 25 12.5 25 5.6 19.4 0 12.5 0z" fill="url(#pinG)"/>
+                <circle cx="12.5" cy="12.2" r="4.6" fill="#f2fbfc"/>
+              </svg>
+              <p class="intro-sign-text">服务无界，城市有光。</p>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="swipe-hint" id="swipe-hint">
+          <span class="swipe-arrow" aria-hidden="true"></span>
+          <span class="swipe-text">上滑，查看活动详情及报名方式</span>
+          <span class="swipe-dots" aria-hidden="true"><i class="on"></i><i></i><i></i></span>
+        </button>
+      </div>
+    </section>

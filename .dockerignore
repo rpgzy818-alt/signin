@@ -1,0 +1,20 @@
+# 构建镜像时不需要的东西
+.git/
+.gitignore
+.dockerignore
+data/
+uploads/
+*.db
+*.db-wal
+*.db-shm
+.env
+.env.local
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.log
+.DS_Store
+.idea/
+.vscode/
+docs/

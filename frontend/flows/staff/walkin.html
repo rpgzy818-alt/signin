@@ -1,0 +1,24 @@
+    <section class="view" id="view-walkin" data-route="walkin">
+      <h2>现场补录</h2>
+      <p class="muted">填写信息后即可完成签到</p>
+      <form id="walkin-form" class="form">
+        <label>姓名 *<input name="name" type="text" placeholder="请输入姓名" maxlength="20" /></label>
+        <div class="wk-row2">
+          <label>国际区号 *
+            <span class="wk-cc">
+              <span class="plus">+</span>
+              <input name="cc" data-cc type="tel" inputmode="numeric" maxlength="5" value="86" autocomplete="off" />
+            </span>
+          </label>
+          <label>手机号 *
+            <input name="phone" type="tel" inputmode="numeric" placeholder="请输入手机号" maxlength="11" autocomplete="tel" />
+          </label>
+        </div>
+        <label class="wk-pick">性别（选填）
+          <input type="hidden" name="gender" value="" />
+          <button type="button" class="fld-pick" data-pick="gender"><span class="fld-pick-v"></span><i class="fld-pick-arrow"></i></button>
+        </label>
+        <button type="submit" class="btn-primary block">补录并签到</button>
+        <p class="form-msg" id="walkin-msg"></p>
+      </form>
+    </section>
