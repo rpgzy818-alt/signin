@@ -74,6 +74,20 @@ docker compose up -d --build    # 改了代码后重建
 tar czf signin-backup-$(date +%F).tar.gz data/
 ```
 
+## 版本与升级
+
+当前版本 **v0.1.0**，变更与已知边界见 [CHANGELOG.md](CHANGELOG.md)。
+
+升级只有三步，顺序不要换：
+
+```bash
+tar czf signin-backup-$(date +%F).tar.gz data/   # 1. 先备份
+git pull                                          # 2. 拉新代码
+docker compose up -d --build                      # 3. 重建并启动
+```
+
+`0.x` 期间数据表结构仍可能变动。跨版本升级前务必完成第 1 步，出问题直接用备份目录覆盖回 `./data`。
+
 ## 不用 Docker 怎么跑
 
 ```bash
